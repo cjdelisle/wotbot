@@ -21,6 +21,7 @@ var ips = [
     'fcc3:def:490f:149b:5b07:9952:d47c:6ec1', // dvn
     'fc9e:ab5a:c263:35c9:8156:8b4b:4850:c6da', // woshilapi
     'fc05:7988:6e81:6986:9410:8e06:b2b8:8bd3', // ralph
+    'fcfe:f4ce:609f:434b:aa44:6ea0:ebc2:2d89', // Igel
 ];
 
 if (ips.indexOf(msg.host) !== -1) {
