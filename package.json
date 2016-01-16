@@ -1,0 +1,11 @@
+{
+  "name": "nsabot",
+  "version": "0.0.0",
+  "description": "everybody is equal, but some people are more equal",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ansuz",
+  "license": "ISC"
+}
