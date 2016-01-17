@@ -32,6 +32,8 @@ var from = args.from,
 
 var commands = /\s*\.(getAllTrusted|getTrust|getValue|kick)/;
 
+console.log("pewpew");
+
 if (commands.test(content)) {
     bot.say(to, "I suppose you're talking to me?");
 } else {
