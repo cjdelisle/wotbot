@@ -1,0 +1,21 @@
+---
+; main config
+debug: true
+
+channels: #bots #cjdns #docomentation #peering #fc00 #netops #webdev #fuck-off-ansuz-you-sjw-tool #paris
+
+floodProtection: true
+floodProtectionDelay: 1000
+
+autoRejoin: true
+autoConnect: true
+
+userName: NSA
+---
+
+---
+; network stuff
+
+nick: NSA
+domain: irc.fc00.io
+---
