@@ -2,34 +2,46 @@ var irc = require("irc"),
     mis = require("mis"),
     lib = require("./lib/index"),
     fs = require("fs"),
+    agml = require("agml"),
     levelup = require("levelup");
 
-var config = {
-    debug: true,
-    channels: [
-        '#bots',
-        '#cjdns',
-        '#documentation',
-        '#cs',
-        '#peering',
-        '#fc00',
-        '#netops',
-        '#webdev',
-        '#fuck-off-ansuz-you-sjw-tool',
-        '#paris',
-    ],
-    floodProtection: true,
-    floodProtectionDelay: 1000,
+var config = {},
+    network = {};
 
-    userName: 'NSA',
+(function () {
+    var tmp=[];
 
-    autoRejoin: false,
-    autoConnect: true,
-};
+    agml.parse(fs.readFileSync('./config.agml', 'utf-8'), tmp);
+
+    // bools
+    ['debug', 'floodProtection', 'autoRejoin', 'autoConnect']
+        .forEach(function (k) {
+            config[k] = tmp[0][k] === 'true';
+        });
+
+    // ints
+    ['floodProtectionDelay']
+        .forEach(function (k) {
+            config[k] = parseInt(tmp[0][k]);
+        });
+
+    // split strings
+    config.channels = tmp[0].channels.trim().split(/\s+/);
+
+    // plain old strings
+    ['userName']
+        .forEach(function (k) {
+            config[k] = tmp[0][k].trim();
+        });
+
+    /* Now network things... */
+    network.nick = tmp[1].nick;
+    network.domain = tmp[1].domain;
+}());
 
 var bot = new irc.Client(
-    'irc.fc00.io',
-    'NSA',
+    network.domain,
+    network.nick,
     config);
 
 var en = mis();
