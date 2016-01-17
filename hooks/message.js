@@ -42,7 +42,10 @@ if (commands.test(content)) {
         time: new Date.getTime(),
     };
 
+    console.log(typeof global.logStream.write);
+
     if (global.logStream && global.logStream.write) {
+
         global.logStream.write(JSON.stringify(line)+"\n");
         bot.say(to, "k");
     } else {
