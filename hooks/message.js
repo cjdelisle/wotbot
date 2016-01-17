@@ -19,15 +19,6 @@ Got a message!
 
 */
 
-// make sure you have an open stream
-
-if (!global.logStream) {
-    global.logStream = fs.createWriteStream(
-        './logs/trust.db',
-        {flags:'a'}
-    );
-}
-
 var from = args.from,
     to = args.to,
     msg = args.message,
@@ -51,9 +42,13 @@ if (commands.test(content)) {
         time: new Date.getTime(),
     };
 
-    global.logStream.write(JSON.stringify(line)+"\n");
+    if (logStream && logStream.write) {
+        logStream.write(JSON.stringify(line)+"\n");
+        bot.say(to, "k");
+    } else {
+        bot.say("Couldn't write to log");
+    }
 
-    bot.say(to, "k");
 } else {
     // do nothing...
 
