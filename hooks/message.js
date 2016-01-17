@@ -33,7 +33,9 @@ var from = args.from,
 var commands = /\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
 
 if (commands.test(content)) {
-    bot.say(to, "I suppose you're talking to me?");
+    var tokens = content.trim().slice(1).split(/\s+/);
+
+    bot.say(to, JSON.stringify(tokens));
 } else {
     // do nothing...
 
