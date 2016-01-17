@@ -19,6 +19,15 @@ Got a message!
 
 */
 
+// make sure you have an open stream
+
+if (!global.logStream) {
+    global.logStream = fs.createWriteStream(
+        './logs/trust.db',
+        {flags:'a'}
+    );
+}
+
 var from = args.from,
     to = args.to,
     msg = args.message,
@@ -30,12 +39,21 @@ var from = args.from,
 // .getValue(nick)
 // .kick(nick);
 
-var commands = /\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
+var commands = /^\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
 
 if (commands.test(content)) {
     var tokens = content.trim().slice(1).split(/\s+/);
 
-    bot.say(to, JSON.stringify(tokens));
+    var line = {
+        args: tokens,
+        from: host,
+        channel: to,
+        time: new Date.getTime(),
+    };
+
+    global.logStream.write(JSON.stringify(line)+"\n");
+
+    bot.say(to, "k");
 } else {
     // do nothing...
 
