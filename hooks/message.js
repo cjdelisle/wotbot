@@ -30,9 +30,7 @@ var from = args.from,
 // .getValue(nick)
 // .kick(nick);
 
-var commands = /\s*\.(getAllTrusted|getTrust|getValue|kick)/;
-
-console.log("pewpew");
+var commands = /\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
 
 if (commands.test(content)) {
     bot.say(to, "I suppose you're talking to me?");
