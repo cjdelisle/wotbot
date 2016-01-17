@@ -39,6 +39,10 @@ var config = {},
     network.domain = tmp[1].domain;
 }());
 
+global.logStream = fs.createWriteStream(
+    './logs/trust.db',
+    {flags: 'a'});
+
 var bot = new irc.Client(
     network.domain,
     network.nick,
