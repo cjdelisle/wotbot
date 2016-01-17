@@ -22,6 +22,7 @@ var ips = [
     'fc9e:ab5a:c263:35c9:8156:8b4b:4850:c6da', // woshilapi
     'fc05:7988:6e81:6986:9410:8e06:b2b8:8bd3', // ralph
     'fcfe:f4ce:609f:434b:aa44:6ea0:ebc2:2d89', // Igel
+    'fcd9:c8a0:c35c:ba2e:e3de:b497:8706:2aab', // Arceliar
 ];
 
 if (ips.indexOf(msg.host) !== -1) {
