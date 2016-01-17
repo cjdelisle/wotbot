@@ -39,7 +39,7 @@ if (commands.test(content)) {
         args: tokens,
         from: host,
         channel: to,
-        time: new Date.getTime(),
+        time: new Date().getTime(),
     };
 
     console.log("Got a message");
