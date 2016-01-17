@@ -2,7 +2,7 @@
 ; main config
 debug: true
 
-channels: #bots #cjdns #docomentation #peering #fc00 #netops #webdev #fuck-off-ansuz-you-sjw-tool #paris
+channels: #bots #cjdns #documentation #peering #fc00 #netops #webdev #fuck-off-ansuz-you-sjw-tool #paris #offmylawn #cs
 
 floodProtection: true
 floodProtectionDelay: 1000
