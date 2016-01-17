@@ -42,6 +42,7 @@ if (commands.test(content)) {
         time: new Date.getTime(),
     };
 
+    console.log("Got a message");
     console.log(typeof global.logStream.write);
 
     if (global.logStream && global.logStream.write) {
