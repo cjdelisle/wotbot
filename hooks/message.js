@@ -42,8 +42,8 @@ if (commands.test(content)) {
         time: new Date.getTime(),
     };
 
-    if (logStream && logStream.write) {
-        logStream.write(JSON.stringify(line)+"\n");
+    if (global.logStream && global.logStream.write) {
+        global.logStream.write(JSON.stringify(line)+"\n");
         bot.say(to, "k");
     } else {
         bot.say("Couldn't write to log");
