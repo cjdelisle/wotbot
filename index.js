@@ -40,7 +40,7 @@ var config = {},
 }());
 
 global.logStream = fs.createWriteStream(
-    './logs/trust.db',
+    './log/trust.db',
     {flags: 'a'});
 
 var bot = new irc.Client(
