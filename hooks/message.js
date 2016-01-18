@@ -34,26 +34,20 @@ var commands = /^\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
 
 if (commands.test(content)) {
     var tokens = content.trim().slice(1).split(/\s+/);
-
     var line = {
         args: tokens,
         from: host,
         channel: to,
         time: new Date().getTime(),
     };
-
     console.log("Got a message");
     console.log(typeof global.logStream.write);
-
     if (global.logStream && global.logStream.write) {
-
         global.logStream.write(JSON.stringify(line)+"\n");
         bot.say(to, "k");
     } else {
         bot.say("Couldn't write to log");
     }
-
 } else {
     // do nothing...
-
 }
