@@ -28,5 +28,11 @@ var ips = [
 ];
 
 if (ips.indexOf(msg.host) !== -1) {
-    bot.send('mode', channel, '+o', nick);
+    // make sure a global semaphore exists...
+    var Sem = global.semaphores = global.semaphores || {};
+
+    // op them in between 1 and 6 seconds
+    Sem['op::'+channel+'->'+nick] = setTimeout(function () {
+        bot.send('mode', channel, '+o', nick);
+    }, Math.random() * 4000 + 1000);
 }
