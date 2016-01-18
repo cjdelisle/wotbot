@@ -33,8 +33,8 @@ if (ips.indexOf(msg.host) !== -1) {
     // make sure a global semaphore exists...
     var Sem = global.semaphores = global.semaphores || {};
 
-    // op them in between 1 and 9 seconds
+    // op them in between 0 and 10 seconds
     Sem['op::'+channel+'->'+nick] = setTimeout(function () {
         bot.send('mode', channel, '+o', nick);
-    }, Math.random() * 8000 + 1000);
+    }, Math.random() * 15000);
 }
