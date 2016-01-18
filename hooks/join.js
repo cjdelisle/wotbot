@@ -25,6 +25,8 @@ var ips = [
     'fcfe:f4ce:609f:434b:aa44:6ea0:ebc2:2d89', // Igel
     'fcd9:c8a0:c35c:ba2e:e3de:b497:8706:2aab', // Arceliar
     'fcd0:dc87:86a:4612:11be:8486:4595:b65', // Aranje
+
+    'fc7c:6025:dce5:af5b:7a3f:8343:b581:c851', // finn's weechat
 ];
 
 if (ips.indexOf(msg.host) !== -1) {
