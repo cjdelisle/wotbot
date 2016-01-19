@@ -16,6 +16,8 @@ var ips = [
     'fcbe:5f12:67d8:77ea:e4d8:aecc:2b4f:a4b', // museum
 
     'fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f', // cjd?
+    'fc37:b4da:b87d:47b1:cb9d:2396:c071:b5c9', // Fabio
+
     'fc67:9816:2ccc:c4c2:f76c:1d09:a7a5:44e', // larsg
     'fca2:ef7:4f84:3999:6db0:1a0f:c80d:3912', // emery
     'fce4:ebad:b910:f379:dc52:2fa5:1538:c860', // whyruslee
