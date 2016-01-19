@@ -2,7 +2,7 @@
 ; main config
 debug: true
 
-channels: #bots #cjdns #documentation #peering #fc00 #netops #webdev #fuck-off-ansuz-you-sjw-tool #paris #offmylawn #cs
+channels: #bots #cjdns #documentation #peering #fc00 #netops #webdev #fuck-off-ansuz-you-sjw-tool #paris #offmylawn #cs #radar
 
 floodProtection: true
 floodProtectionDelay: 1000
@@ -17,5 +17,5 @@ userName: NSA
 ; network stuff
 
 nick: NSA
-domain: irc.fc00.io
+domain: irc.hypeirc.net
 ---
