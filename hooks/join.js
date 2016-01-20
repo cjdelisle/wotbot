@@ -29,6 +29,7 @@ var ips = [
     'fcd0:dc87:86a:4612:11be:8486:4595:b65', // Aranje
 
     'fc7c:6025:dce5:af5b:7a3f:8343:b581:c851', // finn's weechat
+    'fcaa:5785:a537:90db:6513:bba9:87a0:12a7', // benhylau
 ];
 
 if (ips.indexOf(msg.host) !== -1) {
