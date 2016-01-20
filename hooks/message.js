@@ -110,7 +110,7 @@ function validItrust (tokens, cb) {
         // complain and return
         cb("try `.itrust nick <int 0-100>`", null);
         return;
-    } else if (!validPercent(token)) {
+    } else if (!validPercent(tokens[2]) {
         // complain and return
         cb("your value should be an integer between 0 (no trust) and 100 (complete trust)", null);
         return;
