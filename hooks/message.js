@@ -55,8 +55,10 @@ var from = args.from,
                             // no errors, write to log
                             line.args = [tokens[0], out, tokens[2]];
                             global.logStream.write(JSON.stringify(line)+"\n");
-                            bot.say(from + " trusts " +
+
+                            var debug = (from + " trusts " +
                                 out + " " + tokens[2] + "%");
+                            bot.say(debug);
                         }
                     });
                     break;
