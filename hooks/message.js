@@ -101,7 +101,7 @@ function nick2Host (nick, cb) {
             cb(null, message.host);
             console.log(message);
         } else {
-            cb("could not find a host for that nick", null);
+            cb("could not find a host for ["+nick+"]", null);
             console.log("DEBUG");
             console.log(message);
         }
