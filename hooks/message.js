@@ -96,6 +96,7 @@ function nick2Host (nick, cb) {
     bot.whois(nick, function (message) {
         if (message && message.host) {
             cb(null, message.host);
+            console.log(message);
         } else {
             cb("could not find a host for that nick", null);
             console.log("DEBUG");
