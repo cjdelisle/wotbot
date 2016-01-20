@@ -2,7 +2,6 @@ console.log("Got a message!");
 console.log(args);
 
 /*
-
 >message
 Got a message!
 { from: 'ansuz',
@@ -47,7 +46,7 @@ var from = args.from,
 
         if (global.logStream && global.logStream.write) {
             switch (tokens[0]) {
-                'itrust':
+                case 'itrust':
                     validItrust(tokens, function (e, out) {
                         if (e) {
                             // there was an error. complain and return
@@ -59,16 +58,16 @@ var from = args.from,
                         }
                     });
                     break;
-                'getAllTrusted':
+                case 'getAllTrusted':
                     bot.say(to, "todo");
                     break;
-                'getTrust':
+                case 'getTrust':
                     bot.say(to, "todo");
                     break;
-                'getValue':
+                case 'getValue':
                     bot.say(to, "todo");
                     break;
-                'kick':
+                case 'kick':
                     bot.say(to, "todo");
                     break;
                 default:
