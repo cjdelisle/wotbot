@@ -58,7 +58,8 @@ var from = args.from,
 
                             var debug = (from + " trusts " +
                                 out + " " + tokens[2] + "%");
-                            bot.say(debug);
+                            bot.say(to, debug);
+                            console.log(debug);
                         }
                     });
                     break;
