@@ -16,7 +16,6 @@ Got a message!
      rawCommand: 'PRIVMSG',
      commandType: 'normal',
      args: [ '#bots', 'hi NSA' ] } }
-
 */
 
 var from = args.from,
@@ -30,24 +29,92 @@ var from = args.from,
 // .getValue(nick)
 // .kick(nick);
 
-var commands = /^\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
+(function () {
+    if (!config.trustee) { return; }
 
-if (commands.test(content)) {
-    var tokens = content.trim().slice(1).split(/\s+/);
-    var line = {
-        args: tokens,
-        from: host,
-        channel: to,
-        time: new Date().getTime(),
-    };
-    console.log("Got a message");
-    console.log(typeof global.logStream.write);
-    if (global.logStream && global.logStream.write) {
-        global.logStream.write(JSON.stringify(line)+"\n");
-        bot.say(to, "k");
+    var commands = /^\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
+
+    if (commands.test(content)) {
+        var tokens = content.trim().slice(1).split(/\s+/);
+        var line = {
+            args: tokens,
+            from: host,
+            channel: to,
+            time: new Date().getTime(),
+        };
+        console.log("Got a message");
+        console.log(typeof global.logStream.write);
+
+        if (global.logStream && global.logStream.write) {
+            switch (tokens[0]) {
+                'itrust':
+                    validItrust(tokens, function (e, out) {
+                        if (e) {
+                            // there was an error. complain and return
+                            bot.say(to, e);
+                        } else {
+                            // no errors, write to log
+                            line.args = [tokens[0], out, tokens[2]];
+                            global.logStream.write(JSON.stringify(line)+"\n");
+                        }
+                    });
+                    break;
+                'getAllTrusted':
+                    bot.say(to, "todo");
+                    break;
+                'getTrust':
+                    bot.say(to, "todo");
+                    break;
+                'getValue':
+                    bot.say(to, "todo");
+                    break;
+                'kick':
+                    bot.say(to, "todo");
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            bot.say("Couldn't write to log");
+        }
     } else {
-        bot.say("Couldn't write to log");
+        // do nothing...
     }
-} else {
-    // do nothing...
-}
+}());
+
+function validPercent (token) {
+    var num = Number(token);
+    return (typeof (num) === 'number' &&
+        num % 1 === 0 &&
+        num > -1 &&
+        num < 101);
+};
+
+function nick2Host (nick, cb) {
+    // cb(/*ERROR*/, /*result*/);
+    bot.whois(nick, function (message) {
+        if (message.host) {
+            cb("could not find a host for that nick", null);
+        } else {
+            cb(null, message.host);
+        }
+    });
+};
+
+function validItrust (tokens, cb) {
+    // itrust nick/host percent
+
+    // there should be three tokens
+    if (tokens.length !== 3) {
+        // complain and return
+        cb("try `.itrust nick <int 0-100>`", null);
+        return;
+    } else if (!validPercent(token)) {
+        // complain and return
+        cb("your value should be an integer between 0 (no trust) and 100 (complete trust)", null);
+        return;
+    } else {
+        // try to get the host
+        nick2Host(tokens[1], cb);
+    }
+};
