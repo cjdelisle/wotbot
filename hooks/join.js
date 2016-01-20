@@ -7,7 +7,7 @@ var channel = args.channel,
     msg = args.message;
 
 // what hosts do I trust?
-var ips = [
+var oper_ips = global.oper_ips  = [
     'fc6a:30c9:53a1:2c6b:ccbf:1261:2aef:45d3', // union
 
     'fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa', // queen
@@ -32,7 +32,7 @@ var ips = [
     'fcaa:5785:a537:90db:6513:bba9:87a0:12a7', // benhylau
 ];
 
-if (ips.indexOf(msg.host) !== -1) {
+if (oper_ips.indexOf(msg.host) !== -1) {
     // make sure a global semaphore exists...
     var Sem = global.semaphores = global.semaphores || {};
 
