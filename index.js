@@ -14,7 +14,7 @@ var config = {},
     agml.parse(fs.readFileSync('./config.agml', 'utf-8'), tmp);
 
     // bools
-    ['debug', 'floodProtection', 'autoRejoin', 'autoConnect']
+    ['debug', 'floodProtection', 'autoRejoin', 'autoConnect', 'trustee']
         .forEach(function (k) {
             config[k] = tmp[0][k] === 'true';
         });
