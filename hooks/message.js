@@ -94,7 +94,7 @@ function validPercent (token) {
 function nick2Host (nick, cb) {
     // cb(/*ERROR*/, /*result*/);
     bot.whois(nick, function (message) {
-        if (!message.host) {
+        if (!(message.info && host.info.host)) {
             cb("could not find a host for that nick", null);
             console.log("DEBUG");
             console.log(message);
