@@ -19,6 +19,9 @@ var oper_ips = global.oper_ips  = [
     'fc37:b4da:b87d:47b1:cb9d:2396:c071:b5c9', // Fabio
 
     'fc67:9816:2ccc:c4c2:f76c:1d09:a7a5:44e', // larsg
+
+    'fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0', // new larsg
+
     'fca2:ef7:4f84:3999:6db0:1a0f:c80d:3912', // emery
     'fce4:ebad:b910:f379:dc52:2fa5:1538:c860', // whyruslee
     'fcc3:def:490f:149b:5b07:9952:d47c:6ec1', // dvn
