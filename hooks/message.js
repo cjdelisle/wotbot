@@ -54,7 +54,20 @@ var from = args.from,
                         } else {
                             // no errors, write to log
                             line.args = [tokens[0], out, tokens[2]];
-                            global.logStream.write(JSON.stringify(line)+"\n");
+
+                            // what do we actually want to log?
+                            // src, srcNick, dest, destNick, parseInt(trust), time, action
+                            var toLog = {
+                                command: 'itrust',
+                                src: line.from,
+                                srcNick: from,
+                                dest: out,
+                                destNick: tokens[1],
+                                trust: parseInt(tokens[2]),
+                                time: line.time
+                            };
+
+                            global.logStream.write(JSON.stringify(toLog)+"\n");
 
                             var debug = (from + " trusts " +
                                 out + " " + tokens[2] + "%");
