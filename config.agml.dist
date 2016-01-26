@@ -1,5 +1,5 @@
 ---
-; main config
+section: main
 debug: true
 
 channels: #bots #cjdns #documentation #peering #fc00 #netops #webdev #fuck-off-ansuz-you-sjw-tool #paris #offmylawn #cs #radar #toronto
@@ -14,8 +14,14 @@ userName: NSA
 ---
 
 ---
-; network stuff
+section: irc_network
 
 nick: NSA
 domain: irc.hypeirc.net
+---
+
+---
+section: httpd
+
+port: 8080
 ---

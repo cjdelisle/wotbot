@@ -1,36 +1,9 @@
-var fs = require("fs");
+var Spawn = require('child_process').spawn;
 
-var names = {};
-
-var rememberName = function (line, attr) {
-    // see that there's an array to push to
-    names[line[attr]] = names[line[attr]] || [];
-
-    if (names[line[attr]].indexOf(line[attr+'Nick']) === -1) {
-        names[line[attr]].push(line[attr+'Nick']);
-    }
-};
-
-var TRUSTS = fs.readFileSync('./trust.db', 'utf-8')
-    .split("\n")
-    .filter(function (line) { return line; })
-    .map(function (line) {
-        return JSON.parse(line);
-    })
-    .filter(function (line) {
-
-        rememberName(line, 'src');
-        rememberName(line, 'dest');
-        return line.trust > 0 && line.trust < 100;
-    });
-
-//console.log(names);
-//process.exit();
-
-var SOURCE = "fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa";
 var SOURCE = "fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0";
 
-var debug = function (str) { console.log(str); };
+//var debug = function (str) { console.log(str); };
+var debug = function () { };
 
 var resistanceFromTrust = function (trust) {
     if (trust <= 0 || trust > 100) { throw new Error(); }
@@ -54,10 +27,24 @@ var getERS = function (nodesTrusting) {
     return 1 / rDenom;
 };
 
+var rememberName = function (names, line, attr) {
+    // see that there's an array to push to
+    names[line[attr]] = names[line[attr]] || [];
+
+    if (names[line[attr]].indexOf(line[attr+'Nick']) === -1) {
+        names[line[attr]].push(line[attr+'Nick']);
+    }
+};
+
 var run = function (trusts, sourceNode) {
     var trustPairs = { };
-    //var trustsByTarget = { };
     var trustsBySource = { };
+    var names = {};
+
+    trusts.forEach(function (tr) {
+        rememberName(names, tr, 'src');
+        rememberName(names, tr, 'dest');
+    });
 
     // effective resistance from source
     var ers = { };
@@ -72,13 +59,9 @@ var run = function (trusts, sourceNode) {
         var amt = trusts[i].trust;
 
         if (target === source) { continue; }
-        // FIXME don't need this
-//        if (amtS !== amt.toString() || amt <= 0 || amt > 100) { continue; }
-
         var pair = target + '|' + source;
         if (pair in trustPairs) { continue; }
         trustPairs[pair] = 1;
-        //(trustsByTarget[target] = trustsByTarget[target] || {})[source] = amt;
         (trustsBySource[source] = trustsBySource[source] || {})[target] = amt;
         ers[target] = -1;
     }
@@ -96,9 +79,9 @@ var run = function (trusts, sourceNode) {
                 for (var j = i; j < nodes.length; j++) {
                     // TypeError: Cannot use 'in' operator to search for 'fc67:9816:2ccc:c4c2:f76c:1d09:a7a5:44e' in undefined
                     if (!( trustsBySource[nodes[j]] &&
-                            trustsBySource[nodes[j]][targetAddr] )) { 
+                            trustsBySource[nodes[j]][targetAddr] )) {
                         debug("trustsBySource[nodes[j]][targetAddr] is undefined");
-                        continue; 
+                        continue;
                     }
 
                     // if you're here, then it exists...
@@ -121,18 +104,43 @@ var run = function (trusts, sourceNode) {
     var allTrusts = Object.keys(ers).map(function (addr) {
         // effective resistance
         return {
-            trust: trustFromResistance(ers[addr]),
+            karma: trustFromResistance(ers[addr]),
             addr: addr,
+            names: names[addr]
         };
     });
 
     allTrusts.sort(function (a,b) {
-        return b.trust - a.trust;
+        return b.karma - a.karma;
     });
 
-    allTrusts.forEach(function (node) {
-        console.log("["+names[node.addr].join(",")+"]");
-        console.log("\t%s\t%s", node.addr,node.trust);
-    });
+    /*allTrusts.forEach(function (node) {
+        console.error("["+names[node.addr].join(",")+"]");
+        console.error("\t%s\t%s", node.addr,node.karma);
+    });*/
+    console.log(JSON.stringify(allTrusts, null, '  '));
 };
-run(TRUSTS, SOURCE);
+
+if (module.parent === null) {
+    var input = '';
+    process.stdin.on('data', function (d) { input += d; });
+    process.stdin.on('end', function () {
+        run(JSON.parse(input), SOURCE);
+    });
+} else {
+    module.exports.run = function (trusts, cb) {
+        var proc = Spawn('node', [__filename]);
+        var err = '';
+        var out = '';
+        proc.stderr.on('data', function (data) { err += data.toString('utf8'); });
+        proc.stdout.on('data', function (data) { out += data.toString('utf8'); });
+        proc.on('close', function () {
+            var parsed;
+            try {
+                parsed = JSON.parse(out);
+            } catch (e) { cb(e, err); return; }
+            cb(undefined, err, parsed);
+        });
+        proc.stdin.end(JSON.stringify(trusts));
+    };
+}

@@ -94,3 +94,8 @@
 {"command":"itrust","src":"fce4:ebad:b910:f379:dc52:2fa5:1538:c860","srcNick":"whyruslee","dest":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","destNick":"cjd","trust":100,"time":1453748515043}
 {"command":"itrust","src":"clusterfu.ck","srcNick":"fbt","dest":"fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa","destNick":"NSA","trust":0,"time":1453748532092}
 {"command":"itrust","src":"fc99:7d70:d959:c7cf:f4b4:9370:6cf8:55fa","srcNick":"Uniaika","dest":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","destNick":"cjd","trust":75,"time":1453748579419}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa","destNick":"ansuz","trust":100,"time":1453843169589}
+{"command":"itrust","src":"fc87:f729:c42b:8a74:9e05:916f:7b80:6df4","srcNick":"nico_32","dest":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","destNick":"cjd","trust":49,"time":1453843439661}
+{"command":"itrust","src":"fc58:17c:a626:b8d8:4312:3c5:6938:6b78","srcNick":"interfect","dest":"fc58:17c:a626:b8d8:4312:3c5:6938:6b78","destNick":"interfect","trust":100,"time":1453843713598}
+{"command":"itrust","src":"fc13:6176:aaca:8c7f:9f55:924f:26b3:4b14","srcNick":"TrueShift","dest":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","destNick":"cjd","trust":80,"time":1453844294249}
+{"command":"itrust","src":"fc13:6176:aaca:8c7f:9f55:924f:26b3:4b14","srcNick":"TrueShift","dest":"fc7c:6025:dce5:af5b:7a3f:8343:b581:c851","destNick":"finn","trust":80,"time":1453844331386}

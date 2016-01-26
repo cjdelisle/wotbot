@@ -6,7 +6,7 @@ console.log(args);
 Got a message!
 { from: 'ansuz',
   to: '#bots',
-  message: 
+  message:
    { prefix: 'ansuz!~ansuz@fc6a:30c9:53a1:2c6b:ccbf:1261:2aef:45d3',
      nick: 'ansuz',
      user: '~ansuz',
@@ -29,73 +29,95 @@ var from = args.from,
 // .kick(nick);
 
 (function () {
-    if (!config.trustee) { return; }
+//    if (!config.trustee) { return; }
 
-    var commands = /^\s*\.(itrust|getAllTrusted|getTrust|getValue|kick)/;
+    if (!/^\s*\\(itrust|trust|karma|kick|startlogging|stoplogging)/.test(content)) { return; }
 
-    if (commands.test(content)) {
-        var tokens = content.trim().slice(1).split(/\s+/);
-        var line = {
-            args: tokens,
-            from: host,
-            channel: to,
-            time: new Date().getTime(),
-        };
-        console.log("Got a message");
-        console.log(typeof global.logStream.write);
+    var tokens = content.trim().slice(1).split(/\s+/);
+    var line = {
+        args: tokens,
+        from: host,
+        channel: to,
+        time: new Date().getTime(),
+    };
+    console.log("Got a message");
 
-        if (global.logStream && global.logStream.write) {
-            switch (tokens[0]) {
-                case 'itrust':
-                    validItrust(tokens, function (e, out) {
-                        if (e) {
-                            // there was an error. complain and return
-                            bot.say(to, e);
-                        } else {
-                            // no errors, write to log
-                            line.args = [tokens[0], out, tokens[2]];
-
-                            // what do we actually want to log?
-                            // src, srcNick, dest, destNick, parseInt(trust), time, action
-                            var toLog = {
-                                command: 'itrust',
-                                src: line.from,
-                                srcNick: from,
-                                dest: out,
-                                destNick: tokens[1],
-                                trust: parseInt(tokens[2]),
-                                time: line.time
-                            };
-
-                            global.logStream.write(JSON.stringify(toLog)+"\n");
-
+    switch (tokens[0]) {
+        case 'itrust':
+            validItrust(tokens, function (e, out) {
+                if (e) {
+                    // there was an error. complain and return
+                    bot.say(to, e);
+                } else {
+                    // no errors, write to log
+                    global.state.updateTrusts(
+                        line.from, from, out, tokens[1], parseInt(tokens[2]),
+                        function () {
                             var debug = (from + " trusts " +
                                 out + " " + tokens[2] + "%");
                             bot.say(to, debug);
                             console.log(debug);
-                        }
+                        });
+                }
+            });
+            break;
+
+        case 'trust':
+            (function () {
+                if (tokens.length > 3 || tokens.length < 2) {
+                    bot.say(to, "try .trust <src> <dest>  or  .trust <dest>");
+                    return;
+                }
+                var destNick = tokens.pop();
+                var srcNick = (tokens.length === 2) ? tokens.pop() : from;
+                var fin = function (src, dest) {
+                    var trust = global.state.trustBySrcDestPair[src + '|' + dest] || { trust: 0};
+                    bot.say(to, srcNick + " trusts " + destNick + " " + trust.trust + "%");
+                };
+                nick2Host(destNick, function (err, dest) {
+                    if (err) { bot.say(to, err); return; }
+                    if (srcNick !== from) {
+                        nick2Host(srcNick, function (err, src) {
+                            if (err) { bot.say(to, err); return; }
+                            fin(src, dest);
+                        });
+                    } else {
+                        fin(line.from, dest);
+                    }
+                });
+            }());
+            break;
+
+        case 'karma':
+            (function () {
+                if (tokens.length !== 2) {
+                    bot.say(to, 'try .karma <nick>');
+                    return;
+                }
+                nick2Host(tokens[1], function (err, addr) {
+                    if (err) { bot.say(to, err); return; }
+                    global.state.whenSynced(function () {
+                        var karma = global.state.karmaByAddr[addr] || 0;
+                        bot.say(to, addr + ' has ' + karma + ' karma');
                     });
-                    break;
-                case 'getAllTrusted':
-                    bot.say(to, "todo");
-                    break;
-                case 'getTrust':
-                    bot.say(to, "todo");
-                    break;
-                case 'getValue':
-                    bot.say(to, "todo");
-                    break;
-                case 'kick':
-                    bot.say(to, "todo");
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            bot.say("Couldn't write to log");
-        }
-    } else {
-        // do nothing...
+                });
+            }());
+            break;
+
+        case 'kick':
+            bot.say(to, "not quite yet");
+            break;
+
+        // For laughs...
+        case 'startlogging':
+            bot.say(to, "Logging enabled");
+            break;
+        case 'stoplogging':
+            bot.say(to, "You're not the boss of me!");
+            break;
+
+        default:
+            break;
     }
 }());
 
