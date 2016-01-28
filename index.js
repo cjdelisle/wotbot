@@ -3,7 +3,7 @@ var irc = require("irc"),
     lib = require("./lib/index"),
     Fs = require("fs"),
     agml = require("agml"),
-    Compute = require('./test/caleb.js'),
+    Karma = require('./karma.js'),
     TrustDB = require('./trustdb.js');
 
 var DB_FILE = './test/trust.db';
@@ -80,7 +80,7 @@ var checkSync = function () {
     state.syncing = true;
     var trusts = [];
     for (var sdp in state.trustBySrcDestPair) { trusts.push(state.trustBySrcDestPair[sdp]); }
-    Compute.run(trusts, function (err, stderr, result) {
+    Karma.compute(trusts, function (err, stderr, result) {
         if (err) {
             console.log(err);
             state.synced = true;

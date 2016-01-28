@@ -23,5 +23,7 @@ domain: irc.hypeirc.net
 ---
 section: httpd
 
+dbfile: ./test/trust.db
+
 port: 8080
 ---
