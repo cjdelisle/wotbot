@@ -2,8 +2,8 @@ var Spawn = require('child_process').spawn;
 
 var SOURCE = "fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0";
 
-//var debug = function (str) { console.log(str); };
-var debug = function () { };
+var debug = function (str) { console.log(str); };
+debug = function () { };
 
 var resistanceFromTrust = function (trust) {
     if (trust <= 0 || trust > 100) { throw new Error(); }
@@ -27,6 +27,19 @@ var getERS = function (nodesTrusting) {
     return 1 / rDenom;
 };
 
+var dedupe = function (trusts) {
+    var trustPairs = { };
+    var result = [];
+    for (var i = trusts.length-1; i >= 0; i--) {
+        if (trusts[i].dest === trusts[i].src) { continue; }
+        var pair = trusts[i].dest + '|' + trusts[i].src;
+        if (pair in trustPairs) { continue; }
+        trustPairs[pair] = 1;
+        result.unshift(trusts[i]);
+    }
+    return result;
+};
+
 var rememberName = function (names, line, attr) {
     // see that there's an array to push to
     names[line[attr]] = names[line[attr]] || [];
@@ -36,33 +49,26 @@ var rememberName = function (names, line, attr) {
     }
 };
 
-var run = function (trusts, sourceNode) {
-    var trustPairs = { };
-    var trustsBySource = { };
+var getNamesForIps = function (trusts) {
     var names = {};
-
     trusts.forEach(function (tr) {
         rememberName(names, tr, 'src');
         rememberName(names, tr, 'dest');
     });
+    return names;
+};
 
+var run = function (trusts, sourceNode) {
+    var trustsBySource = { };
+    var names = getNamesForIps(trusts);
     // effective resistance from source
     var ers = { };
-    for (var i = trusts.length-1; i >= 0; i--) {
-        // formerly args[1]
-        var target = trusts[i].dest
-        // formerly .from
-        var source = trusts[i].src
-        // formerly args[2]
-        // var amtS = trusts[i].trust;
-        //var amt = Number(amtS);
-        var amt = trusts[i].trust;
+    trusts = dedupe(trusts);
 
-        if (target === source) { continue; }
-        var pair = target + '|' + source;
-        if (pair in trustPairs) { continue; }
-        trustPairs[pair] = 1;
-        (trustsBySource[source] = trustsBySource[source] || {})[target] = amt;
+    for (var i = trusts.length-1; i >= 0; i--) {
+        var target = trusts[i].dest
+        var src = trusts[i].src;
+        (trustsBySource[src] = trustsBySource[src] || {})[target] = trusts[i].trust;
         ers[target] = -1;
     }
 
@@ -77,19 +83,13 @@ var run = function (trusts, sourceNode) {
                 debug('  trusted by ' + nodes[i] + ' ' + trustsBySource[nodes[i]][targetAddr]);
                 var nodesTrusting = [ ];
                 for (var j = i; j < nodes.length; j++) {
-                    // TypeError: Cannot use 'in' operator to search for 'fc67:9816:2ccc:c4c2:f76c:1d09:a7a5:44e' in undefined
-                    if (!( trustsBySource[nodes[j]] &&
-                            trustsBySource[nodes[j]][targetAddr] )) {
-                        debug("trustsBySource[nodes[j]][targetAddr] is undefined");
-                        continue;
+                    if (trustsBySource[nodes[j]] && trustsBySource[nodes[j]][targetAddr]) {
+                        nodesTrusting.push({
+                            addr: nodes[j],
+                            ers: ers[nodes[j]],
+                            trust: trustsBySource[nodes[j]][targetAddr]
+                        });
                     }
-
-                    // if you're here, then it exists...
-                    nodesTrusting.push({
-                        addr: nodes[j],
-                        ers: ers[nodes[j]],
-                        trust: trustsBySource[nodes[j]][targetAddr]
-                    });
                 }
                 ers[targetAddr] = getERS(nodesTrusting);
                 next.push(targetAddr);
@@ -101,31 +101,31 @@ var run = function (trusts, sourceNode) {
 
     debug('\n\n\n');
 
-    var allTrusts = Object.keys(ers).map(function (addr) {
+    return Object.keys(ers).map(function (addr) {
         // effective resistance
         return {
             karma: trustFromResistance(ers[addr]),
             addr: addr,
             names: names[addr]
         };
-    });
-
-    allTrusts.sort(function (a,b) {
+    }).sort(function (a,b) {
         return b.karma - a.karma;
     });
-
-    /*allTrusts.forEach(function (node) {
-        console.error("["+names[node.addr].join(",")+"]");
-        console.error("\t%s\t%s", node.addr,node.karma);
-    });*/
-    console.log(JSON.stringify(allTrusts, null, '  '));
 };
 
 if (module.parent === null) {
     var input = '';
     process.stdin.on('data', function (d) { input += d; });
     process.stdin.on('end', function () {
-        run(JSON.parse(input), SOURCE);
+        if (process.argv.indexOf('test') !== -1) {
+            input = '[' + input.replace(/\n/g, ',\n').slice(0, -2) + ']';
+            run(JSON.parse(input), SOURCE).forEach(function (x) {
+                console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + x.names.join() + '\t\t\t(' +
+                    x.addr + ')');
+            });
+            return;
+        }
+        console.log(JSON.stringify(run(JSON.parse(input), SOURCE), null, '  '));
     });
 } else {
     module.exports.run = function (trusts, cb) {

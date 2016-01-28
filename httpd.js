@@ -65,10 +65,10 @@ var handleRequest = function (request, response) {
 
         response.end(JSON.stringify({
                 available_commands: {
-                '/trustHistory?since=<millisecondsSinceEpoch>':
+                '/trust/trustHistory?since=<millisecondsSinceEpoch>':
                     'every .itrust which was ever sent (since time if specified)',
-                '/trusts': 'all most recent trust updates, enough to compute the graph',
-                '/karmas': 'mappings of value (according to computation) for each person'
+                '/trust/trusts': 'all most recent trust updates, enough to compute the graph',
+                '/trust/karmas': 'mappings of value (according to computation) for each person'
             }
         }, null, '  '));
     });
