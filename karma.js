@@ -1,15 +1,11 @@
 var Spawn = require('child_process').spawn;
 
-var SOURCE = "fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0";
-
-var debug = function (str) { console.log(str); };
-debug = function () { };
+var ROOT = "fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0";
 
 var dedupe = function (trusts) {
     var trustPairs = { };
     var result = [];
     for (var i = trusts.length-1; i >= 0; i--) {
-        if (trusts[i].dest === trusts[i].src) { continue; }
         var pair = trusts[i].dest + '|' + trusts[i].src;
         if (pair in trustPairs) { continue; }
         trustPairs[pair] = 1;
@@ -59,7 +55,7 @@ var maxMetric = function (nodes, root) {
     return res;
 };
 
-var run = function (trusts, sourceNode) {
+var run = function (trusts, root) {
     var names = getNamesForIps(trusts);
     trusts = dedupe(trusts);
 
@@ -73,10 +69,11 @@ var run = function (trusts, sourceNode) {
     }
 
     var out = [];
-    var res = maxMetric(nodes, sourceNode);
+    var res = maxMetric(nodes, root);
     for (var addr in res) { out.push({ karma: res[addr] * 100, addr: addr, names: names[addr] }); }
     out.sort(function (a,b) {
-        return b.karma - a.karma;
+        if (b.karma !== a.karma) { return b.karma - a.karma; }
+        return a.addr < b.addr ? 1 : -1;
     });
     return out;
 };
@@ -86,13 +83,14 @@ if (module.parent === null) {
     process.stdin.on('data', function (d) { input += d; });
     process.stdin.on('end', function () {
         if (process.argv.indexOf('properjson') === -1) {
-            run(require('./trustdb').parse(input), SOURCE).forEach(function (x) {
-                console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + x.names.join() + '\t\t\t(' +
-                    x.addr + ')');
+            run(require('./trustdb').parse(input), ROOT).forEach(function (x) {
+                var pNames = x.names.join();
+                pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
+                console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + pNames + x.addr);
             });
             return;
         }
-        console.log(JSON.stringify(run(JSON.parse(input), SOURCE), null, '  '));
+        console.log(JSON.stringify(run(JSON.parse(input), ROOT), null, '  '));
     });
 } else {
     module.exports.compute = function (trusts, cb) {

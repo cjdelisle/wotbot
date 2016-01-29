@@ -1,20 +1,22 @@
 var Fs = require('fs');
 
-var IP_REGEX = /([a-f0-9]{1,4}:){2,}/;
+var IP_REGEX = /^fc[a-f0-9]{2}:/;
 
 var parse = module.exports.parse = function (str) {
     return str.split("\n")
-        .filter(function (line) { return line; })
+        .filter(function (line) { return line[0] === '{'; })
         .map(function (line) {
             try { return JSON.parse(line); } catch (err) { }
             return null;
         })
         .filter(function (line) {
             if (!line) { return false; }
+            if (line.src === line.dest) { return false; }
             if (!(IP_REGEX.test(line.dest))) { return false; }
             if (!(IP_REGEX.test(line.src))) { return false; }
-            if (typeof(line.trust) !== 'number' || line.trust < 0 || line.trust > 100) { return false; }
-            return line.trust > 0 && line.trust < 100;
+            if (typeof(line.trust) !== 'number') { return false; }
+            if (line.trust <= 0 || line.trust > 100) { return false; }
+            return true;
         });
 };
 
