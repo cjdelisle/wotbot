@@ -17,7 +17,6 @@ var dedupe = function (trusts) {
 var rememberName = function (names, line, attr) {
     // see that there's an array to push to
     names[line[attr]] = names[line[attr]] || [];
-
     if (names[line[attr]].indexOf(line[attr+'Nick']) === -1) {
         names[line[attr]].push(line[attr+'Nick']);
     }
@@ -55,6 +54,14 @@ var maxMetric = function (nodes, root) {
     return res;
 };
 
+var sortKarmas = function (list) {
+    list.sort(function (a,b) {
+        if (b.karma !== a.karma) { return b.karma - a.karma; }
+        return a.addr < b.addr ? 1 : -1;
+    });
+    return list;
+};
+
 var run = function (trusts, root) {
     var names = getNamesForIps(trusts);
     trusts = dedupe(trusts);
@@ -71,11 +78,38 @@ var run = function (trusts, root) {
     var out = [];
     var res = maxMetric(nodes, root);
     for (var addr in res) { out.push({ karma: res[addr] * 100, addr: addr, names: names[addr] }); }
-    out.sort(function (a,b) {
-        if (b.karma !== a.karma) { return b.karma - a.karma; }
-        return a.addr < b.addr ? 1 : -1;
-    });
+    sortKarmas(out);
     return out;
+};
+
+var RESERVE_K = 0.3;
+var runRootless = function (state0, trusts) {
+    var karmaByAddr = {};
+    state0.forEach(function (x) { karmaByAddr[x.addr] = 1||x.karma; });
+    var totalTrustByAddr = {};
+    trusts.forEach(function (t) {
+        totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]|0) + t.trust;
+    });
+    var nextKarmaByAddr = {};
+    trusts.forEach(function (t) {
+        var ks = karmaByAddr[t.src]|0;
+        var kd = karmaByAddr[t.dest]|0;
+        var tfrac = t.trust / totalTrustByAddr[t.src];
+        if (tfrac > 1) { throw new Error(); }
+        nextKarmaByAddr[t.dest] = (nextKarmaByAddr[t.dest] || kd) + ((ks - (ks * RESERVE_K)) * tfrac);
+         //* (t.trust / totalTrustByAddr[t.src]) );
+    });
+    return sortKarmas(state0.map(function (x) {
+        return { karma: nextKarmaByAddr[x.addr], addr: x.addr, names: x.names };
+    }));
+};
+
+var printRes = function (res) {
+    res.forEach(function (x) {
+        var pNames = x.names.join();
+        pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
+        console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + pNames + x.addr);
+    });
 };
 
 if (module.parent === null) {
@@ -83,6 +117,15 @@ if (module.parent === null) {
     process.stdin.on('data', function (d) { input += d; });
     process.stdin.on('end', function () {
         if (process.argv.indexOf('properjson') === -1) {
+
+            var parsed = require('./trustdb').parse(input);
+            //parsed.forEach(function (x) { console.log(x. "") })
+            var out = run(parsed, ROOT);
+            printRes(out);
+            console.log('\n\n');
+            printRes(runRootless(out, parsed));
+            return;
+
             run(require('./trustdb').parse(input), ROOT).forEach(function (x) {
                 var pNames = x.names.join();
                 pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
