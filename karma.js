@@ -1,5 +1,3 @@
-var Spawn = require('child_process').spawn;
-
 var ROOT = "fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0";
 var TRAIN_UNTIL = 1453844364189;
 var RESERVE_K = 0.3;
@@ -68,7 +66,6 @@ var karmasToList = function (map) {
 
 var getZeroKarmas = function (trusts) {
     var names = getNamesForIps(trusts);
-    trusts = dedupe(trusts);
 
     var addresses = {};
     for (var i = 0; i < trusts.length; i++) {
@@ -84,9 +81,13 @@ var getZeroKarmas = function (trusts) {
 var run = function (trusts) {
     var zkarmas = getZeroKarmas(trusts);
     var nodes = {};
+    var trustPairs = {};
     for (var i = trusts.length-1; i >= 0; i--) {
         if (trusts[i].time > TRAIN_UNTIL) { continue; }
         var srcAddr = trusts[i].src;
+        var pair = trusts[i].dest + '|' + srcAddr;
+        if (pair in trustPairs) { continue; }
+        trustPairs[pair] = 1;
         var n = nodes[srcAddr] = nodes[srcAddr] || {};
         var l = n.links = n.links || []
         l.push({ target: trusts[i].dest, weight: trusts[i].trust / 100 });
@@ -97,39 +98,44 @@ var run = function (trusts) {
 };
 
 var runRootless = function (state0, trusts) {
-    var karmaByAddr = {};
-    for (var addr in state0) { karmaByAddr[addr] = state0[addr].karma; }
-    var totalTrustByAddr = {};
-    trusts.forEach(function (t) {
-        totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]|0) + t.trust;
-        karmaByAddr[t.dst] = karmaByAddr[t.dst]|0;
-    });
-    var nextKarmaByAddr = {};
-    trusts.forEach(function (t) {
-        var ks = karmaByAddr[t.src]|0;
-        var kd = karmaByAddr[t.dest]|0;
-        var tfrac = t.trust / totalTrustByAddr[t.src];
-        if (tfrac > 1) { throw new Error(); }
-        nextKarmaByAddr[t.dest] = (nextKarmaByAddr[t.dest] || kd) +
-            ((ks - (ks * RESERVE_K)) * tfrac);
-    });
-    var totalKarma = 0;
-    var totalDiff = 0;
-    for (var addr in nextKarmaByAddr) { totalKarma += nextKarmaByAddr[addr]; }
-    var multiplier = 1000/totalKarma;
-    totalKarma = 0;
-    for (var addr in nextKarmaByAddr) {
-        var nk = nextKarmaByAddr[addr] * multiplier;
-        totalDiff += Math.abs(state0[addr].karma - nk);
-        state0[addr].karma = nk;
-    }
-    return totalDiff;
+    state0 = JSON.parse(JSON.stringify(state0));
+    trusts = dedupe(trusts);
+    var cycle = function () {
+        var karmaByAddr = {};
+        for (var addr in state0) { karmaByAddr[addr] = state0[addr].karma; }
+        var totalTrustByAddr = {};
+        trusts.forEach(function (t) {
+            totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]|0) + t.trust;
+            karmaByAddr[t.dst] = karmaByAddr[t.dst]|0;
+        });
+        var nextKarmaByAddr = {};
+        trusts.forEach(function (t) {
+            var ks = karmaByAddr[t.src]|0;
+            var kd = karmaByAddr[t.dest]|0;
+            var tfrac = t.trust / totalTrustByAddr[t.src];
+            if (tfrac > 1) { throw new Error(); }
+            nextKarmaByAddr[t.dest] = (nextKarmaByAddr[t.dest] || kd) +
+                ((ks - (ks * RESERVE_K)) * tfrac);
+        });
+        var totalKarma = 0;
+        var totalDiff = 0;
+        for (var addr in nextKarmaByAddr) { totalKarma += nextKarmaByAddr[addr]; }
+        var multiplier = 1000/totalKarma;
+        totalKarma = 0;
+        for (var addr in nextKarmaByAddr) {
+            var nk = nextKarmaByAddr[addr] * multiplier;
+            totalDiff += Math.abs(state0[addr].karma - nk);
+            state0[addr].karma = nk;
+        }
+        return totalDiff;
+    };
+    while (cycle() > 1) ;
+    return state0;
 };
 
-var runAll = function (parsed) {
+var compute = module.exports.compute = function (parsed) {
     var out = run(parsed);
-    while (runRootless(out, parsed) > 1) ;
-    return karmasToList(out);
+    return karmasToList(runRootless(out, parsed));
 };
 
 var printRes = function (res) {
@@ -144,30 +150,10 @@ if (module.parent === null) {
     var input = '';
     process.stdin.on('data', function (d) { input += d; });
     process.stdin.on('end', function () {
-        if (process.argv.indexOf('properjson') === -1) {
-            runAll(require('./trustdb').parse(input), ROOT).forEach(function (x) {
-                var pNames = x.names.join();
-                pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
-                console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + pNames + x.addr);
-            });
-            return;
-        }
-        console.log(JSON.stringify(runAll(JSON.parse(input), ROOT), null, '  '));
-    });
-} else {
-    module.exports.compute = function (trusts, cb) {
-        var proc = Spawn('node', [__filename, 'properjson']);
-        var err = '';
-        var out = '';
-        proc.stderr.on('data', function (data) { err += data.toString('utf8'); });
-        proc.stdout.on('data', function (data) { out += data.toString('utf8'); });
-        proc.on('close', function () {
-            var parsed;
-            try {
-                parsed = JSON.parse(out);
-            } catch (e) { cb(e, err); return; }
-            cb(undefined, err, parsed);
+        compute(require('./trustdb').parse(input)).forEach(function (x) {
+            var pNames = x.names.join();
+            pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
+            console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + pNames + x.addr);
         });
-        proc.stdin.end(JSON.stringify(trusts));
-    };
+    });
 }
