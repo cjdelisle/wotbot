@@ -43,7 +43,7 @@ var from = args.from,
     console.log("Got a message");
 
     switch (tokens[0]) {
-        case 'itrust':
+        case 'itrust': (function () {
             validItrust(tokens, function (e, out) {
                 if (e) {
                     // there was an error. complain and return
@@ -60,53 +60,51 @@ var from = args.from,
                         });
                 }
             });
-            break;
+        }());break;
 
-        case 'trust':
-            (function () {
-                if (tokens.length > 3 || tokens.length < 2) {
-                    bot.say(to, "try .trust <src> <dest>  or  .trust <dest>");
-                    return;
-                }
-                var destNick = tokens.pop();
-                var srcNick = (tokens.length === 2) ? tokens.pop() : from;
-                var fin = function (src, dest) {
-                    var trust = global.state.trustBySrcDestPair[src + '|' + dest] || { trust: 0};
-                    bot.say(to, srcNick + " trusts " + destNick + " " + trust.trust + "%");
-                };
-                nick2Host(destNick, function (err, dest) {
-                    if (err) { bot.say(to, err); return; }
-                    if (srcNick !== from) {
-                        nick2Host(srcNick, function (err, src) {
-                            if (err) { bot.say(to, err); return; }
-                            fin(src, dest);
-                        });
-                    } else {
-                        fin(line.from, dest);
-                    }
-                });
-            }());
-            break;
-
-        case 'karma':
-            (function () {
-                if (tokens.length !== 2) {
-                    bot.say(to, 'try .karma <nick>');
-                    return;
-                }
-                nick2Host(tokens[1], function (err, addr) {
-                    if (err) { bot.say(to, err); return; }
-                    global.state.whenSynced(function () {
-                        var karma = global.state.karmaByAddr[addr] || 0;
-                        bot.say(to, addr + ' has ' + karma + ' karma');
+        case 'trust': (function () {
+            if (tokens.length > 3 || tokens.length < 2) {
+                bot.say(to, "try .trust <src> <dest>  or  .trust <dest>");
+                return;
+            }
+            var destNick = tokens.pop();
+            var srcNick = (tokens.length === 2) ? tokens.pop() : from;
+            var fin = function (src, dest) {
+                var trust = global.state.trustBySrcDestPair[src + '|' + dest] || { trust: 0};
+                bot.say(to, srcNick + " trusts " + destNick + " " + trust.trust + "%");
+            };
+            nick2Host(destNick, function (err, dest) {
+                if (err) { bot.say(to, err); return; }
+                if (srcNick !== from) {
+                    nick2Host(srcNick, function (err, src) {
+                        if (err) { bot.say(to, err); return; }
+                        fin(src, dest);
                     });
-                });
-            }());
-            break;
+                } else {
+                    fin(line.from, dest);
+                }
+            });
+        }());break;
 
-        case 'kick':
-            bot.say(to, "not quite yet");
-            break;
+        case 'karma': (function () {
+            if (tokens.length !== 2) {
+                bot.say(to, 'try .karma <nick>');
+                return;
+            }
+            nick2Host(tokens[1], function (err, addr) {
+                if (err) { bot.say(to, err); return; }
+                global.state.whenSynced(function () {
+                    var karma = global.state.karmaByAddr[addr] || 0;
+                    bot.say(to, addr + ' has ' + karma + ' karma');
+                });
+            });
+        }());break;
+
+        case 'error': (function () {
+            var error = global.state.error || "none";
+            global.state.error = undefined;
+            bot.say(to, error);
+        }());break;
 
         // For laughs...
         case 'startlogging':

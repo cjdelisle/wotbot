@@ -80,6 +80,8 @@ var checkSync = function () {
     state.syncing = true;
     var trusts = [];
     for (var sdp in state.trustBySrcDestPair) { trusts.push(state.trustBySrcDestPair[sdp]); }
+    trusts.sort(function (a, b) { return a.time - b.time });
+    var trustStr = JSON.stringify(trusts);
     Karma.compute(trusts, function (err, result) {
         if (err) {
             console.log(err);
@@ -87,6 +89,9 @@ var checkSync = function () {
             state.error = err;
             state.syncing = false;
             return;
+        }
+        if (JSON.stringify(trusts) !== trustStr) {
+            state.error = "trust desync!";
         }
         state.karmas = result;
         state.karmaByAddr = {};
