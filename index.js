@@ -80,7 +80,7 @@ var checkSync = function () {
     state.syncing = true;
     var trusts = [];
     for (var sdp in state.trustBySrcDestPair) { trusts.push(state.trustBySrcDestPair[sdp]); }
-    Karma.compute(trusts, function (err, stderr, result) {
+    Karma.compute(trusts, function (err, result) {
         if (err) {
             console.log(err);
             state.synced = true;
