@@ -48,7 +48,7 @@ var state = {
     error: null,
     onSync: [],
     whenSynced: null,
-    trustBySrcDestPair: {},
+    trustList: [],
     karmas: null,
     karmaByAddr: null,
     logStream: Fs.createWriteStream(DB_FILE, {flags: 'a'})
@@ -68,7 +68,7 @@ var updateTrusts = state.updateTrusts = function (src, srcNick, dst, dstNick, am
             trust: parseInt(amt),
             time: new Date().getTime()
         };
-        state.trustBySrcDestPair[src + '|' + dst] = line;
+        state.trustList.push(line);
         state.logStream.write(JSON.stringify(line)+"\n");
         synced = false;
         cb();
@@ -78,11 +78,8 @@ var updateTrusts = state.updateTrusts = function (src, srcNick, dst, dstNick, am
 var checkSync = function () {
     if (state.synced || state.syncing) { return; }
     state.syncing = true;
-    var trusts = [];
-    for (var sdp in state.trustBySrcDestPair) { trusts.push(state.trustBySrcDestPair[sdp]); }
-    trusts.sort(function (a, b) { return a.time - b.time });
-    var trustStr = JSON.stringify(trusts);
-    Karma.compute(trusts, function (err, result) {
+    var trustStr = JSON.stringify(state.trustList);
+    Karma.compute(state.trustList, function (err, result) {
         if (err) {
             console.log(err);
             state.synced = true;
@@ -90,9 +87,7 @@ var checkSync = function () {
             state.syncing = false;
             return;
         }
-        if (JSON.stringify(trusts) !== trustStr) {
-            state.error = "trust desync!";
-        }
+        if (JSON.stringify(state.trustList) !== trustStr) { throw new Error(); }
         state.karmas = result;
         state.karmaByAddr = {};
         result.forEach(function (karma) { state.karmaByAddr[karma.addr] = karma.karma; });
@@ -116,7 +111,7 @@ global.state = state;
 TrustDB.readFile(DB_FILE, function (err, trusts) {
     // unrecoverable
     if (err) { throw err; }
-    trusts.forEach(function (tr) { state.trustBySrcDestPair[tr.src + '|' + tr.dest] = tr; });
+    state.trustList.push.apply(state.trustList, trusts);
     checkSync();
 
     var bot = new irc.Client(network.domain, network.nick, config);

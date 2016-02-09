@@ -62,30 +62,6 @@ var from = args.from,
             });
         }());break;
 
-        case 'trust': (function () {
-            if (tokens.length > 3 || tokens.length < 2) {
-                bot.say(to, "try .trust <src> <dest>  or  .trust <dest>");
-                return;
-            }
-            var destNick = tokens.pop();
-            var srcNick = (tokens.length === 2) ? tokens.pop() : from;
-            var fin = function (src, dest) {
-                var trust = global.state.trustBySrcDestPair[src + '|' + dest] || { trust: 0};
-                bot.say(to, srcNick + " trusts " + destNick + " " + trust.trust + "%");
-            };
-            nick2Host(destNick, function (err, dest) {
-                if (err) { bot.say(to, err); return; }
-                if (srcNick !== from) {
-                    nick2Host(srcNick, function (err, src) {
-                        if (err) { bot.say(to, err); return; }
-                        fin(src, dest);
-                    });
-                } else {
-                    fin(line.from, dest);
-                }
-            });
-        }());break;
-
         case 'karma': (function () {
             if (tokens.length !== 2) {
                 bot.say(to, 'try .karma <nick>');
