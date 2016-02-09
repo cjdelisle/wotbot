@@ -31,7 +31,7 @@ var from = args.from,
 (function () {
 //    if (!config.trustee) { return; }
 
-    if (!/^\s*\.(itrust|trust|karma|kick|startlogging|stoplogging)/.test(content)) { return; }
+    if (!/^\s*\.(itrust|trust|karma|kick|startlogging|stoplogging|error)/.test(content)) { return; }
 
     var tokens = content.trim().slice(1).split(/\s+/);
     var line = {
