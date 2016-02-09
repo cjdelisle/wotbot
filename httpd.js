@@ -10,9 +10,9 @@ var DEFAULT_DB_FILE = './test/trust.db';
 var requests = { };
 
 requests.karma = function (request, response, trusts) {
-    Karma.compute(trusts, function (err, stderr, out) {
+    Karma.compute(trusts, function (err, out) {
         if (err) {
-            response.end(JSON.stringify({error: err, stderr: stderr}, null, '  '));
+            response.end(JSON.stringify(err, null, '  '));
             return;
         }
         response.end(JSON.stringify(out, null, '  '));
