@@ -133,9 +133,9 @@ var runRootless = function (state0, trusts) {
     return state0;
 };
 
-var compute = module.exports.compute = function (parsed) {
+var compute = module.exports.compute = function (parsed, cb) {
     var out = run(parsed);
-    return karmasToList(runRootless(out, parsed));
+    cb(undefined, karmasToList(runRootless(out, parsed)));
 };
 
 var printRes = function (res) {
@@ -150,10 +150,13 @@ if (module.parent === null) {
     var input = '';
     process.stdin.on('data', function (d) { input += d; });
     process.stdin.on('end', function () {
-        compute(require('./trustdb').parse(input)).forEach(function (x) {
-            var pNames = x.names.join();
-            pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
-            console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + pNames + x.addr);
+        compute(require('./trustdb').parse(input), function (err, ret) {
+            if (err) { throw err; }
+            ret.forEach(function (x) {
+                var pNames = x.names.join();
+                pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
+                console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + pNames + x.addr);
+            });
         });
     });
 }

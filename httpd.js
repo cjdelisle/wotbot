@@ -88,7 +88,7 @@ var main = function () {
             var fun = requests[request.url.replace(/^.*\/|\?.*$/g, '')] || requests.help;
             fun(request, response, trusts);
         });
-    }).listen(port, function () {
+    }).listen(port, '::', function () {
         console.log("listening on port " + port);
     });
 };
