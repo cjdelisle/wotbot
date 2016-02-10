@@ -206,3 +206,15 @@
 {"command":"itrust","src":"fc17:cc7e:57ea:1d2e:da91:6a65:b11e:a6d0","srcNick":"sol56","dest":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","destNick":"cjd","trust":49,"time":1455013613074}
 {"command":"itrust","src":"fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa","srcNick":"ansuz","dest":"fc17:cc7e:57ea:1d2e:da91:6a65:b11e:a6d0","destNick":"sol56","trust":50,"time":1455014027289}
 {"command":"itrust","src":"fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa","srcNick":"ansuz","dest":"fc5d:baa5:61fc:6ffd:9554:67f0:e290:7535","destNick":"Mikey","trust":75,"time":1455031486481}
+{"command":"itrust","src":"fc58:17c:a626:b8d8:4312:3c5:6938:6b78","srcNick":"interfect","dest":"fcdc:71fe:e8c2:f3ba:ca93:80f4:3d97:2096","destNick":"lex","trust":50,"time":1455057737781}
+{"command":"itrust","src":"fc58:17c:a626:b8d8:4312:3c5:6938:6b78","srcNick":"interfect","dest":"fca8:2dd7:4987:a9be:c8fc:34d7:5a1:4606","destNick":"jercos","trust":75,"time":1455057745824}
+{"command":"itrust","src":"fc9b:6269:cbae:3e26:31e1:8f68:8cea:337b","srcNick":"Pharynx","dest":"fc9b:6269:cbae:3e26:31e1:8f68:8cea:337b","destNick":"Pharynx","trust":100,"time":1455057748848}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fcdc:71fe:e8c2:f3ba:ca93:80f4:3d97:2096","destNick":"lex","trust":45,"time":1455057831916}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fcdc:71fe:e8c2:f3ba:ca93:80f4:3d97:2096","destNick":"lex","trust":40,"time":1455060126225}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fcdc:71fe:e8c2:f3ba:ca93:80f4:3d97:2096","destNick":"lex","trust":30,"time":1455060151375}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fcdc:71fe:e8c2:f3ba:ca93:80f4:3d97:2096","destNick":"lex","trust":45,"time":1455060248494}
+{"command":"itrust","src":"fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa","srcNick":"ansuz","dest":"fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0","destNick":"larsg","trust":100,"time":1455062794510}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fc7f:3d04:419f:e9b0:526f:fc6a:576:cba0","destNick":"larsg","trust":100,"time":1455062815538}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fcdc:71fe:e8c2:f3ba:ca93:80f4:3d97:2096","destNick":"lex","trust":30,"time":1455063088919}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fcdc:71fe:e8c2:f3ba:ca93:80f4:3d97:2096","destNick":"lex","trust":45,"time":1455063098920}
+{"command":"itrust","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","dest":"fc9b:6269:cbae:3e26:31e1:8f68:8cea:337b","destNick":"Pharynx","trust":20,"time":1455063167017}
