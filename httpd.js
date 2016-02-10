@@ -40,7 +40,7 @@ requests.trustHistory = function (request, response, trusts) {
     response.end(out);
 };
 
-requests.trust = function (request, response, trusts) {
+var dedupe = function (trusts) {
     var srcDestPairs = {};
     var outTrusts = [];
     for (var i = trusts.length-1; i >= 0; i--) {
@@ -49,9 +49,32 @@ requests.trust = function (request, response, trusts) {
         srcDestPairs[sdp] = 1;
         outTrusts.unshift(trusts[i]);
     }
+    return outTrusts;
+};
+
+requests.trust = function (request, response, trusts) {
     response.end(JSON.stringify({
         error: 'none',
-        trusts: outTrusts
+        trusts: dedupe(trusts)
+    }, null, '  '));
+};
+
+requests.trustedBy = function (request, response, trusts) {
+    trusts = dedupe(trusts);
+    var by = request.url.replace(/.*\?by=/, '');
+    if (by === request.url) {
+        response.end(JSON.stringify({ error: "invalid request, expect ?by=<nick|ip>" }));
+        return;
+    }
+    trusts = trusts.filter(function (tr) {
+        return tr.srcNick === by || tr.src === by;
+    }).map(function (tr) {
+        return { destNick: tr.destNick, dest: tr.dest, trust: tr.trust };
+    });
+    trusts.sort(function (a, b) { return b.trust - a.trust; });
+    response.end(JSON.stringify({
+        error: 'none',
+        trusts: trusts
     }, null, '  '));
 };
 
@@ -61,7 +84,8 @@ requests.help = function (request, response, trusts) {
             '/trust/trustHistory?since=<millisecondsSinceEpoch>':
                 'every .itrust which was ever sent (since time if specified)',
             '/trust/trust': 'all most recent trust updates, enough to compute the graph',
-            '/trust/karma': 'mappings of value (according to computation) for each person'
+            '/trust/karma': 'mappings of value (according to computation) for each person',
+            '/trust/trustedBy?by=<name|ip>': 'get ips/names trusted by a given ip/name'
         }
     }, null, '  '));
 };
