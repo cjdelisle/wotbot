@@ -105,6 +105,12 @@ function validPercent (token) {
 
 function nick2Host (nick, cb) {
     // cb(/*ERROR*/, /*result*/);
+    if (nick.indexOf(':') !== -1) {
+        if (typeof(global.state.karmaByAddr[nick]) !== 'undefined') {
+            cb(null, nick);
+            return;
+        }
+    }
     bot.whois(nick, function (message) {
         if (message && message.host) {
             cb(null, message.host);

@@ -138,14 +138,6 @@ var compute = module.exports.compute = function (parsed, cb) {
     cb(undefined, karmasToList(runRootless(out, parsed)));
 };
 
-var printRes = function (res) {
-    res.forEach(function (x) {
-        var pNames = x.names.join();
-        pNames += (new Array(Math.max(30 - pNames.length, 5))).join(' ');
-        console.log(Math.floor(x.karma * 1000) / 1000 + '\t\t' + pNames + x.addr);
-    });
-};
-
 if (module.parent === null) {
     var input = '';
     process.stdin.on('data', function (d) { input += d; });
