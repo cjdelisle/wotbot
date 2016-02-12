@@ -1,10 +1,11 @@
-var irc = require("irc"),
-    mis = require("mis"),
-    lib = require("./lib/index"),
-    Fs = require("fs"),
-    agml = require("agml"),
-    Karma = require('./karma.js'),
-    TrustDB = require('./trustdb.js');
+var irc = require("irc");
+var mis = require("mis");
+var lib = require("./lib/index");
+var Fs = require("fs");
+var agml = require("agml");
+var Karma = require('./karma.js');
+var TrustDB = require('./trustdb.js');
+var nThen = require('nthen');
 
 var DB_FILE = './test/trust.db';
 
@@ -49,28 +50,26 @@ var state = {
     onSync: [],
     whenSynced: null,
     trustList: [],
+    referendums: [],
     karmas: null,
     karmaByAddr: null,
     logStream: Fs.createWriteStream(DB_FILE, {flags: 'a'})
 };
-var updateTrusts = state.updateTrusts = function (src, srcNick, dst, dstNick, amt, cb) {
+var logToDb = state.logToDb = function (structure, cb) {
     var run = function () {
         if (state.syncing) {
             setTimeout(run, 1);
             return;
         }
-        var line = {
-            command: 'itrust',
-            src: src,
-            srcNick: srcNick,
-            dest: dst,
-            destNick: dstNick,
-            trust: parseInt(amt),
-            time: new Date().getTime()
-        };
-        state.trustList.push(line);
-        state.logStream.write(JSON.stringify(line)+"\n");
-        synced = false;
+        if (structure.command === 'referendum') {
+            state.referendums.push(structure);
+        } else if (structure.command === 'itrust') {
+            state.trustList.push(structure);
+        } else {
+            throw new Error();
+        }
+        state.logStream.write(JSON.stringify(structure)+"\n");
+        state.synced = false;
         cb();
     };
     run();
@@ -79,18 +78,31 @@ var checkSync = function () {
     if (state.synced || state.syncing) { return; }
     state.syncing = true;
     var trustStr = JSON.stringify(state.trustList);
-    Karma.compute(state.trustList, function (err, result) {
-        if (err) {
-            console.log(err);
-            state.synced = true;
-            state.error = err;
-            state.syncing = false;
-            return;
-        }
-        if (JSON.stringify(state.trustList) !== trustStr) { throw new Error(); }
-        state.karmas = result;
+    var karmas;
+    nThen(function (waitFor) {
+        TrustDB.readFile(DB_FILE, waitFor(function (err, trusts) {
+            if (err) { throw err; }
+            trusts = trusts.filter(function (tr) { return (tr.command === 'itrust') });
+            console.log(JSON.stringify(trusts, null, '  '));
+            console.log(JSON.stringify(state.trustList, null, '  '));
+            if (trustStr !== JSON.stringify(trusts)) { throw new Error(); }
+        }));
+    }).nThen(function (waitFor) {
+        Karma.compute(state.trustList, waitFor(function (err, result) {
+            if (err) {
+                console.log(err);
+                state.synced = true;
+                state.error = err;
+                state.syncing = false;
+                return;
+            } else {
+                state.karmas = result;
+                if (JSON.stringify(state.trustList) !== trustStr) { throw new Error(); }
+            }
+        }));
+    }).nThen(function (waitFor) {
         state.karmaByAddr = {};
-        result.forEach(function (karma) { state.karmaByAddr[karma.addr] = karma.karma; });
+        state.karmas.forEach(function (karma) { state.karmaByAddr[karma.addr] = karma.karma; });
         state.synced = true;
         state.syncing = false;
         var oss = state.onSync;
@@ -111,7 +123,12 @@ global.state = state;
 TrustDB.readFile(DB_FILE, function (err, trusts) {
     // unrecoverable
     if (err) { throw err; }
-    state.trustList.push.apply(state.trustList, trusts);
+    trusts.forEach(function (tr) {
+        switch (tr.command) {
+            case 'itrust': state.trustList.push(tr); break;
+            case 'referendum': state.referendums.push(tr); break;
+        }
+    });
     checkSync();
 
     var bot = new irc.Client(network.domain, network.nick, config);

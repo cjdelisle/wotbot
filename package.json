@@ -11,6 +11,7 @@
   "dependencies": {
     "irc": "^0.4.0",
     "mis": "git+https://github.com/ansuz/mis.git",
-    "agml": "^2.0.0"
+    "agml": "^2.0.0",
+    "nthen": "~0.1.1"
   }
 }

@@ -17,6 +17,9 @@ Got a message!
      args: [ '#bots', 'hi NSA' ] } }
 */
 
+var ONE_WEEK_MS = 1000 * 60 * 60 * 24 * 7;
+var now = function () { return new Date().getTime(); };
+
 var from = args.from,
     to = args.to,
     msg = args.message,
@@ -31,7 +34,7 @@ var from = args.from,
 (function () {
 //    if (!config.trustee) { return; }
 
-    if (!/^\s*\.(itrust|trust|karma|kick|startlogging|stoplogging|error)/.test(content)) { return; }
+    if (!/^\s*\\(itrust|trust|karma|error|referendum|endreferendum)/.test(content)) { return; }
 
     var tokens = content.trim().slice(1).split(/\s+/);
     var line = {
@@ -50,14 +53,17 @@ var from = args.from,
                     bot.say(to, e);
                 } else {
                     // no errors, write to log
-                    global.state.updateTrusts(
-                        line.from, from, out, tokens[1], parseInt(tokens[2]),
-                        function () {
-                            var debug = (from + " trusts " +
-                                out + " " + tokens[2] + "%");
-                            bot.say(to, debug);
-                            console.log(debug);
-                        });
+                    global.state.logToDb({
+                        command: 'itrust',
+                        src: line.from,
+                        srcNick: from,
+                        dest: out,
+                        destNick: tokens[1],
+                        trust: parseInt(tokens[2]),
+                        time: new Date().getTime()
+                    }, function () {
+                        bot.say(to, (from + " trusts " + out + " " + tokens[2] + "%"));
+                    });
                 }
             });
         }());break;
@@ -82,13 +88,55 @@ var from = args.from,
             bot.say(to, error);
         }());break;
 
-        // For laughs...
-        case 'startlogging':
-            bot.say(to, "Logging enabled");
-            break;
-        case 'stoplogging':
-            bot.say(to, "You're not the boss of me!");
-            break;
+        case 'referendum': (function () {
+            if (tokens.length < 4) {
+                bot.say(to, 'try .referendum <url of description> <opt1> <opt2> [<optX>]');
+                return;
+            }
+            var num = global.state.referendums.length;
+            tokens.pop();
+            var url = tokens.pop();
+            global.state.logToDb({
+                command: 'referendum',
+                src: line.from,
+                srcNick: from,
+                url: url,
+                options: tokens,
+                num: num,
+                time: new Date().getTime()
+            }, function () {
+                bot.say(to, (from + " created referendum r" + num + " (" + tokens[1] + ")"));
+            });
+        }());break;
+
+        case 'vote': (function () {
+            if (tokens.length < 3 || !/^[rR][0-9]+$/.test(tokens[1])) {
+                bot.say(to, 'try .vote r<number> <choice1> [<choice2> [<choiceX>]]');
+                return;
+            }
+            var ref = global.state.referendums[Number(tokens[1].substring(1))];
+            if (!ref) {
+                bot.say(to, 'referendum ' + tokens[1] + ' not found');
+                return;
+            }
+            if (ref.time < (now() - ONE_WEEK_MS)) {
+                bot.say(to, 'voting on referendum ' + tokens[1] + ' has closed');
+                return;
+            }
+            tokens.pop();
+            var url = tokens.pop();
+            global.state.logToDb({
+                command: 'referendum',
+                src: line.from,
+                srcNick: from,
+                url: url,
+                options: tokens,
+                num: num,
+                time: now()
+            }, function () {
+                bot.say(to, "Vote registered");
+            });
+        }());break;
 
         default:
             break;
