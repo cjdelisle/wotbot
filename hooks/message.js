@@ -47,6 +47,10 @@ var from = args.from,
 
     switch (tokens[0]) {
         case 'itrust': (function () {
+            if (from === tokens[1]) {
+                bot.say(to, "yeah yeah everybody trusts themselves, old news");
+                return;
+            }
             validItrust(tokens, function (e, out) {
                 if (e) {
                     // there was an error. complain and return
@@ -156,6 +160,7 @@ var from = args.from,
 }());
 
 function validPercent (token) {
+    if (Number(token).toString() !== token || token === "NaN") { return false; }
     var num = Number(token);
     return (typeof (num) === 'number' &&
         num % 1 === 0 &&
