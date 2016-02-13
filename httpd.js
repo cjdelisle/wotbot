@@ -35,7 +35,7 @@ requests.trustHistory = function (request, response, trusts) {
             error: 'none',
             since: since,
             trusts: filteredTrusts,
-        }, null, '  ')
+        }, null, '  ');
     }
     response.end(out);
 };

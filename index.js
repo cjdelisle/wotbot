@@ -86,7 +86,7 @@ var checkSync = function () {
     nThen(function (waitFor) {
         TrustDB.readFile(DB_FILE, waitFor(function (err, trusts) {
             if (err) { throw err; }
-            trusts = trusts.filter(function (tr) { return (tr.command === 'itrust') });
+            trusts = trusts.filter(function (tr) { return (tr.command === 'itrust'); });
             console.log(JSON.stringify(trusts, null, '  '));
             console.log(JSON.stringify(state.trustList, null, '  '));
             if (trustStr !== JSON.stringify(trusts)) { throw new Error(); }
@@ -159,6 +159,7 @@ TrustDB.readFile(DB_FILE, function (err, trusts) {
                         console.error(e);
                     } else {
                         try {
+                            /* jshint -W061 */ // Suppress jshint warning
                             eval(out);
                         } catch (err) {
                             console.error(err);

@@ -1,3 +1,4 @@
+/* globals args, bot */
 console.log("Got a message!");
 console.log(args);
 
@@ -30,6 +31,54 @@ var from = args.from,
 // .getTrust(fromNick, toNick)
 // .getValue(nick)
 // .kick(nick);
+
+var validPercent = function (token) {
+    if (Number(token).toString() !== token || token === "NaN") { return false; }
+    var num = Number(token);
+    return (typeof (num) === 'number' &&
+        num % 1 === 0 &&
+        num > -1 &&
+        num < 101);
+};
+
+var nick2Host = function (nick, cb) {
+    // cb(/*ERROR*/, /*result*/);
+    if (nick.indexOf(':') !== -1) {
+        if (typeof(global.state.karmaByAddr[nick]) !== 'undefined') {
+            cb(null, nick);
+            return;
+        }
+    }
+    bot.whois(nick, function (message) {
+        if (message && message.host) {
+            cb(null, message.host);
+            console.log(message);
+        } else {
+            cb("could not find a host for ["+nick+"]", null);
+            console.log("DEBUG");
+            console.log(message);
+        }
+    });
+};
+
+var validItrust = function (tokens, cb) {
+    // itrust nick/host percent
+
+    // there should be three tokens
+    if (tokens.length !== 3) {
+        // complain and return
+        cb("try `.itrust nick <int 0-100>`", null);
+        return;
+    } else if (!validPercent(tokens[2])) {
+        // complain and return
+        cb("your value should be an integer between 0 (no trust) and 100 (complete trust)", null);
+        return;
+    } else {
+        // try to get the host
+        nick2Host(tokens[1], cb);
+    }
+};
+
 
 (function () {
 //    if (!config.trustee) { return; }
@@ -143,7 +192,6 @@ var from = args.from,
                 srcNick: from,
                 url: url,
                 options: tokens,
-                num: num,
                 time: now()
             }, function (err) {
                 if (err) {
@@ -158,50 +206,3 @@ var from = args.from,
             break;
     }
 }());
-
-function validPercent (token) {
-    if (Number(token).toString() !== token || token === "NaN") { return false; }
-    var num = Number(token);
-    return (typeof (num) === 'number' &&
-        num % 1 === 0 &&
-        num > -1 &&
-        num < 101);
-};
-
-function nick2Host (nick, cb) {
-    // cb(/*ERROR*/, /*result*/);
-    if (nick.indexOf(':') !== -1) {
-        if (typeof(global.state.karmaByAddr[nick]) !== 'undefined') {
-            cb(null, nick);
-            return;
-        }
-    }
-    bot.whois(nick, function (message) {
-        if (message && message.host) {
-            cb(null, message.host);
-            console.log(message);
-        } else {
-            cb("could not find a host for ["+nick+"]", null);
-            console.log("DEBUG");
-            console.log(message);
-        }
-    });
-};
-
-function validItrust (tokens, cb) {
-    // itrust nick/host percent
-
-    // there should be three tokens
-    if (tokens.length !== 3) {
-        // complain and return
-        cb("try `.itrust nick <int 0-100>`", null);
-        return;
-    } else if (!validPercent(tokens[2])) {
-        // complain and return
-        cb("your value should be an integer between 0 (no trust) and 100 (complete trust)", null);
-        return;
-    } else {
-        // try to get the host
-        nick2Host(tokens[1], cb);
-    }
-};

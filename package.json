@@ -18,6 +18,6 @@
     "jshint": "~2.9.1"
   },
   "scripts": {
-      "lint": "jshint --config .jshintrc --exclude-path .jshintignore ."
+      "lint": "jshint --verbose --config .jshintrc --exclude-path .jshintignore ."
   }
 }

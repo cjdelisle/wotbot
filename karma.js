@@ -40,7 +40,7 @@ var maxMetric = function (nodes, root) {
     modified.push(root);
     do {
         var current = modified.shift();
-        if (nodes[current] == null) {
+        if (nodes[current] === null) {
             continue;
         }
         for (var i = 0; i < nodes[current].links.length; i++) {
@@ -91,7 +91,7 @@ var run = function (trusts) {
         trustPairs[pair] = 1;
         if (trusts[i].trust === 0) { continue; }
         var n = nodes[srcAddr] = nodes[srcAddr] || {};
-        var l = n.links = n.links || []
+        var l = n.links = n.links || [];
         l.push({ target: trusts[i].dest, weight: trusts[i].trust / 100 });
     }
     var res = maxMetric(nodes, ROOT);
@@ -104,7 +104,8 @@ var runRootless = function (state0, trusts) {
     trusts = dedupe(trusts);
     var cycle = function () {
         var karmaByAddr = {};
-        for (var addr in state0) { karmaByAddr[addr] = state0[addr].karma; }
+        var addr;
+        for (addr in state0) { karmaByAddr[addr] = state0[addr].karma; }
         var totalTrustByAddr = {};
         trusts.forEach(function (t) {
             totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]|0) + t.trust;
@@ -121,17 +122,17 @@ var runRootless = function (state0, trusts) {
         });
         var totalKarma = 0;
         var totalDiff = 0;
-        for (var addr in nextKarmaByAddr) { totalKarma += nextKarmaByAddr[addr]; }
+        for (addr in nextKarmaByAddr) { totalKarma += nextKarmaByAddr[addr]; }
         var multiplier = 1000/totalKarma;
         totalKarma = 0;
-        for (var addr in nextKarmaByAddr) {
+        for (addr in nextKarmaByAddr) {
             var nk = nextKarmaByAddr[addr] * multiplier;
             totalDiff += Math.abs(state0[addr].karma - nk);
             state0[addr].karma = nk;
         }
         return totalDiff;
     };
-    while (cycle() > 1) ;
+    while (cycle() > 1) {}
     return state0;
 };
 
