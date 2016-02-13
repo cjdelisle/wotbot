@@ -135,6 +135,7 @@ var runRootless = function (state0, trusts) {
 };
 
 var compute = module.exports.compute = function (parsed, cb) {
+    parsed = parsed.filter(function (x) { return x.command === 'itrust'; });
     var out = run(parsed);
     cb(undefined, karmasToList(runRootless(out, parsed)));
 };

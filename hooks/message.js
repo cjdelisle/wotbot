@@ -1,6 +1,4 @@
 /* globals args, bot, state */
-console.log("Got a message!");
-console.log(args);
 
 /*
 >message
@@ -83,9 +81,10 @@ var validItrust = function (tokens, cb) {
 (function () {
 //    if (!config.trustee) { return; }
 
-    if (!/^\s*\\(itrust|trust|karma|error|referendum|endreferendum)/.test(content)) { return; }
+    if (!/^\s*\\(itrust|trust|karma|error|referendum|endreferendum|vote)/.test(content)) { return; }
 
     var tokens = content.trim().slice(1).split(/\s+/);
+    if (to === bot.nick) { to = from; }
     var line = {
         args: tokens,
         from: host,
@@ -133,7 +132,7 @@ var validItrust = function (tokens, cb) {
             nick2Host(tokens[1], function (err, addr) {
                 if (err) { bot.say(to, err); return; }
                 state.whenSynced(function () {
-                    var karma = state.karmaByAddr[addr] || 0;
+                    var karma = Math.floor((state.karmaByAddr[addr] || 0) * 1000) / 1000;
                     bot.say(to, addr + ' has ' + karma + ' karma');
                 });
             });

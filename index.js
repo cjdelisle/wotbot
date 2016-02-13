@@ -55,7 +55,7 @@ var state = {
     karmas: null,
     karmaByAddr: null,
     logStream: Fs.createWriteStream(DB_FILE, {flags: 'a'}),
-    timeOfLastPing: (new Date()).getTime()
+    timeOfLastMsg: (new Date()).getTime()
 };
 var logToDb = state.logToDb = function (structure, cb) {
     var run = function () {
@@ -89,8 +89,8 @@ var checkSync = function () {
         TrustDB.readFile(DB_FILE, waitFor(function (err, trusts) {
             if (err) { throw err; }
             trusts = trusts.filter(function (tr) { return (tr.command === 'itrust'); });
-            console.log(JSON.stringify(trusts, null, '  '));
-            console.log(JSON.stringify(state.trustList, null, '  '));
+            //console.log(JSON.stringify(trusts, null, '  '));
+            //console.log(JSON.stringify(state.trustList, null, '  '));
             if (trustStr !== JSON.stringify(trusts)) { throw new Error(); }
         }));
     }).nThen(function (waitFor) {
@@ -140,7 +140,7 @@ TrustDB.readFile(DB_FILE, function (err, trusts) {
     var bot = new irc.Client(network.domain, network.nick, config);
 
     setInterval(function () {
-        if ((new Date().getTime()) - state.timeOfLastPing > LAG_MAX_BEFORE_DISCONNECT) {
+        if ((new Date().getTime()) - state.timeOfLastMsg > LAG_MAX_BEFORE_DISCONNECT) {
             console.log("Lag out");
             process.exit(1);
         }
@@ -160,6 +160,7 @@ TrustDB.readFile(DB_FILE, function (err, trusts) {
         .forEach(function (k) {
             en(k, function (args) {
                 console.log('\n>' + k);
+                state.timeOfLastMsg = (new Date()).getTime();
             });
 
             en(k, function (args) {
