@@ -61,6 +61,10 @@ var logToDb = state.logToDb = function (structure, cb) {
             setTimeout(run, 1);
             return;
         }
+        if (!TrustDB.validate(structure)) {
+            cb("TrustDB.validate() failed");
+            return;
+        }
         if (structure.command === 'referendum') {
             state.referendums.push(structure);
         } else if (structure.command === 'itrust') {

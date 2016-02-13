@@ -61,8 +61,12 @@ var from = args.from,
                         destNick: tokens[1],
                         trust: parseInt(tokens[2]),
                         time: new Date().getTime()
-                    }, function () {
-                        bot.say(to, (from + " trusts " + out + " " + tokens[2] + "%"));
+                    }, function (err) {
+                        if (err) {
+                            bot.say(to, err);
+                        } else {
+                            bot.say(to, (from + " trusts " + out + " " + tokens[2] + "%"));
+                        }
                     });
                 }
             });
@@ -104,8 +108,12 @@ var from = args.from,
                 options: tokens,
                 num: num,
                 time: new Date().getTime()
-            }, function () {
-                bot.say(to, (from + " created referendum r" + num + " (" + tokens[1] + ")"));
+            }, function (err) {
+                if (err) {
+                    bot.say(to, err);
+                } else {
+                    bot.say(to, (from + " created referendum r" + num + " (" + tokens[1] + ")"));
+                }
             });
         }());break;
 
@@ -133,8 +141,12 @@ var from = args.from,
                 options: tokens,
                 num: num,
                 time: now()
-            }, function () {
-                bot.say(to, "Vote registered");
+            }, function (err) {
+                if (err) {
+                    bot.say(to, err);
+                } else {
+                    bot.say(to, "Vote registered");
+                }
             });
         }());break;
 
