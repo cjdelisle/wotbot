@@ -9,6 +9,7 @@ var dedupe = function (trusts) {
         var pair = trusts[i].dest + '|' + trusts[i].src;
         if (pair in trustPairs) { continue; }
         trustPairs[pair] = 1;
+        if (trusts[i].trust === 0) { continue; }
         result.unshift(trusts[i]);
     }
     return result;
@@ -88,6 +89,7 @@ var run = function (trusts) {
         var pair = trusts[i].dest + '|' + srcAddr;
         if (pair in trustPairs) { continue; }
         trustPairs[pair] = 1;
+        if (trusts[i].trust === 0) { continue; }
         var n = nodes[srcAddr] = nodes[srcAddr] || {};
         var l = n.links = n.links || []
         l.push({ target: trusts[i].dest, weight: trusts[i].trust / 100 });

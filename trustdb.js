@@ -16,7 +16,7 @@ var parse = module.exports.parse = function (str) {
                 if (!(IP_REGEX.test(line.dest))) { return false; }
                 if (!(IP_REGEX.test(line.src))) { return false; }
                 if (typeof(line.trust) !== 'number') { return false; }
-                if (line.trust <= 0 || line.trust > 100) { return false; }
+                if (line.trust < 0 || line.trust > 100) { return false; }
             } else if (line.command === 'referendum') {
                 // no verification yet
             } else {
