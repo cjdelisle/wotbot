@@ -42,9 +42,11 @@ var config = {},
     /* Now network things... */
     network.nick = tmp[1].nick;
     network.domain = tmp[1].domain;
+    network.trigger = tmp[1].trigger || '.';
 }());
 
 var state = {
+    trigger: network.trigger,
     synced: false,
     syncing: false,
     error: null,

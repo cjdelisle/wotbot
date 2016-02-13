@@ -79,9 +79,7 @@ var validItrust = function (tokens, cb) {
 
 
 (function () {
-//    if (!config.trustee) { return; }
-
-    if (!/^\s*\\(itrust|trust|karma|error|referendum|endreferendum|vote)/.test(content)) { return; }
+    if (content.indexOf(state.trigger) !== 0) { return; }
 
     var tokens = content.trim().slice(1).split(/\s+/);
     if (to === bot.nick) { to = from; }

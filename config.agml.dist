@@ -16,8 +16,9 @@ userName: wotbot
 ---
 section: irc_network
 
-nick: NSA
+nick: wotbot
 domain: irc.hypeirc.net
+trigger: .
 ---
 
 ---
