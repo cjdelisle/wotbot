@@ -40,9 +40,7 @@ var maxMetric = function (nodes, root) {
     modified.push(root);
     do {
         var current = modified.shift();
-        if (nodes[current] === null) {
-            continue;
-        }
+        if (!nodes[current]) { continue; }
         for (var i = 0; i < nodes[current].links.length; i++) {
             var link = nodes[current].links[i];
             var tmp = res[link.target] || 0;
