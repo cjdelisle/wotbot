@@ -59,19 +59,37 @@ requests.trust = function (request, response, trusts) {
     }, null, '  '));
 };
 
-requests.trustedBy = function (request, response, trusts) {
-    trusts = dedupe(trusts);
-    var by = request.url.replace(/.*\?by=/, '');
-    if (by === request.url) {
-        response.end(JSON.stringify({ error: "invalid request, expect ?by=<nick|ip>" }));
+requests.network = function (request, response, trusts) {
+    var sort = 'from';
+    var of;
+    request.url.replace(/.*\?.*of=([^&]+)/, function (all, o) { of = o; });
+    request.url.replace(/.*\?.*sortBy=([^&]+)/, function (all, s) { sort = s; });
+    if (!of) {
+        response.end(JSON.stringify({ error: "invalid request, expect ?of=<nick|ip>" }));
         return;
     }
-    trusts = trusts.filter(function (tr) {
-        return tr.srcNick === by || tr.src === by;
-    }).map(function (tr) {
-        return { destNick: tr.destNick, dest: tr.dest, trust: tr.trust };
+    if (sort !== 'from' && sort !== 'to') {
+        response.end(JSON.stringify({ error: "invalid request, expect ?sortBy=<from|to>" }));
+        return;
+    }
+    var trustByAddr = {};
+    dedupe(trusts).forEach(function (tr) {
+        if (tr.destNick === of || tr.dest === of) {
+            trustByAddr[tr.src] = trustByAddr[tr.src] ||
+                { nick: tr.srcNick, addr: tr.srcAddr, trustTo: 0 };
+            trustByAddr[tr.src].trustFrom = tr.trust;
+        } else if (tr.srcNick === of || tr.src === of) {
+            trustByAddr[tr.dest] = trustByAddr[tr.dest] ||
+                { nick: tr.destNick, addr: tr.destAddr, trustFrom: 0 };
+            trustByAddr[tr.dest].trustTo = tr.trust;
+        }
     });
-    trusts.sort(function (a, b) { return b.trust - a.trust; });
+    trusts = Object.keys(trustByAddr).map(function (addr) { return trustByAddr[addr]; });
+    if (sort === 'from') {
+        trusts.sort(function (a, b) { return b.trustTo - a.trustTo; });
+    } else if (sort === 'to') {
+        trusts.sort(function (a, b) { return b.trustTo - a.trustTo; });
+    }
     response.end(JSON.stringify({
         error: 'none',
         trusts: trusts
@@ -85,7 +103,9 @@ requests.help = function (request, response, trusts) {
                 'every .itrust which was ever sent (since time if specified)',
             '/trust/trust': 'all most recent trust updates, enough to compute the graph',
             '/trust/karma': 'mappings of value (according to computation) for each person',
-            '/trust/trustedBy?by=<name|ip>': 'get ips/names trusted by a given ip/name'
+            '/trust/network?of=<name|ip>[&sortBy=<from|to>]':
+                'get ips/names who trust in and are trusted by ip/name, optionally sorted by ' +
+                    'most trust given to or received from.'
         }
     }, null, '  '));
 };
