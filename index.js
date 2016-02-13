@@ -55,7 +55,7 @@ var state = {
     karmas: null,
     karmaByAddr: null,
     logStream: Fs.createWriteStream(DB_FILE, {flags: 'a'}),
-    timeOfLastPing = (new Date()).getTime()
+    timeOfLastPing: (new Date()).getTime()
 };
 var logToDb = state.logToDb = function (structure, cb) {
     var run = function () {
