@@ -1,4 +1,4 @@
-/* globals args, bot */
+/* globals args, bot, state */
 console.log("Got a message!");
 console.log(args);
 
@@ -44,7 +44,7 @@ var validPercent = function (token) {
 var nick2Host = function (nick, cb) {
     // cb(/*ERROR*/, /*result*/);
     if (nick.indexOf(':') !== -1) {
-        if (typeof(global.state.karmaByAddr[nick]) !== 'undefined') {
+        if (typeof(state.karmaByAddr[nick]) !== 'undefined') {
             cb(null, nick);
             return;
         }
@@ -106,7 +106,7 @@ var validItrust = function (tokens, cb) {
                     bot.say(to, e);
                 } else {
                     // no errors, write to log
-                    global.state.logToDb({
+                    state.logToDb({
                         command: 'itrust',
                         src: line.from,
                         srcNick: from,
@@ -132,16 +132,16 @@ var validItrust = function (tokens, cb) {
             }
             nick2Host(tokens[1], function (err, addr) {
                 if (err) { bot.say(to, err); return; }
-                global.state.whenSynced(function () {
-                    var karma = global.state.karmaByAddr[addr] || 0;
+                state.whenSynced(function () {
+                    var karma = state.karmaByAddr[addr] || 0;
                     bot.say(to, addr + ' has ' + karma + ' karma');
                 });
             });
         }());break;
 
         case 'error': (function () {
-            var error = global.state.error || "none";
-            global.state.error = undefined;
+            var error = state.error || "none";
+            state.error = undefined;
             bot.say(to, error);
         }());break;
 
@@ -150,10 +150,10 @@ var validItrust = function (tokens, cb) {
                 bot.say(to, 'try .referendum <url of description> <opt1> <opt2> [<optX>]');
                 return;
             }
-            var num = global.state.referendums.length;
+            var num = state.referendums.length;
             tokens.pop();
             var url = tokens.pop();
-            global.state.logToDb({
+            state.logToDb({
                 command: 'referendum',
                 src: line.from,
                 srcNick: from,
@@ -175,7 +175,7 @@ var validItrust = function (tokens, cb) {
                 bot.say(to, 'try .vote r<number> <choice1> [<choice2> [<choiceX>]]');
                 return;
             }
-            var ref = global.state.referendums[Number(tokens[1].substring(1))];
+            var ref = state.referendums[Number(tokens[1].substring(1))];
             if (!ref) {
                 bot.say(to, 'referendum ' + tokens[1] + ' not found');
                 return;
@@ -186,7 +186,7 @@ var validItrust = function (tokens, cb) {
             }
             tokens.pop();
             var url = tokens.pop();
-            global.state.logToDb({
+            state.logToDb({
                 command: 'referendum',
                 src: line.from,
                 srcNick: from,

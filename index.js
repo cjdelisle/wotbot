@@ -8,6 +8,7 @@ var TrustDB = require('./trustdb.js');
 var nThen = require('nthen');
 
 var DB_FILE = './test/trust.db';
+var LAG_MAX_BEFORE_DISCONNECT = 256000;
 
 var config = {},
     network = {};
@@ -53,7 +54,8 @@ var state = {
     referendums: [],
     karmas: null,
     karmaByAddr: null,
-    logStream: Fs.createWriteStream(DB_FILE, {flags: 'a'})
+    logStream: Fs.createWriteStream(DB_FILE, {flags: 'a'}),
+    timeOfLastPing = (new Date()).getTime()
 };
 var logToDb = state.logToDb = function (structure, cb) {
     var run = function () {
@@ -136,6 +138,13 @@ TrustDB.readFile(DB_FILE, function (err, trusts) {
     checkSync();
 
     var bot = new irc.Client(network.domain, network.nick, config);
+
+    setInterval(function () {
+        if ((new Date().getTime()) - state.timeOfLastPing > LAG_MAX_BEFORE_DISCONNECT) {
+            console.log("Lag out");
+            process.exit(1);
+        }
+    }, 1000);
 
     var en = mis();
 
