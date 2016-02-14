@@ -59,25 +59,6 @@ var nick2Host = function (nick, cb) {
     });
 };
 
-var validItrust = function (tokens, cb) {
-    // itrust nick/host percent
-
-    // there should be three tokens
-    if (tokens.length !== 3) {
-        // complain and return
-        cb("try `.itrust nick <int 0-100>`", null);
-        return;
-    } else if (!validPercent(tokens[2])) {
-        // complain and return
-        cb("your value should be an integer between 0 (no trust) and 100 (complete trust)", null);
-        return;
-    } else {
-        // try to get the host
-        nick2Host(tokens[1], cb);
-    }
-};
-
-
 (function () {
     if (content.indexOf(state.trigger) !== 0) { return; }
 
