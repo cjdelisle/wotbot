@@ -72,13 +72,22 @@ requests.network = function (request, response, trusts) {
         response.end(JSON.stringify({ error: "invalid request, expect ?sortBy=<from|to>" }));
         return;
     }
+    var addr = of;
+    trusts = dedupe(trusts);
+    trusts.some(function (tr) {
+        if (tr.destNick === of || tr.dest === of) {
+            addr = tr.dest;
+        } else if (tr.srcNick === of || tr.src === of) {
+            addr = tr.src;
+        }
+    });
     var trustByAddr = {};
     dedupe(trusts).forEach(function (tr) {
-        if (tr.destNick === of || tr.dest === of) {
+        if (tr.dest === addr) {
             trustByAddr[tr.src] = trustByAddr[tr.src] ||
                 { nick: tr.srcNick, addr: tr.srcAddr, trustTo: 0 };
             trustByAddr[tr.src].trustFrom = tr.trust;
-        } else if (tr.srcNick === of || tr.src === of) {
+        } else if (tr.src === addr) {
             trustByAddr[tr.dest] = trustByAddr[tr.dest] ||
                 { nick: tr.destNick, addr: tr.destAddr, trustFrom: 0 };
             trustByAddr[tr.dest].trustTo = tr.trust;
