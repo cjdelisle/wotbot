@@ -54,11 +54,24 @@ var state = {
     whenSynced: null,
     trustList: [],
     referendums: [],
+    trustBySrcDestPair: {},
     karmas: null,
     karmaByAddr: null,
     logStream: Fs.createWriteStream(DB_FILE, {flags: 'a'}),
     timeOfLastMsg: (new Date()).getTime()
 };
+
+var updateState = function (structure) {
+    if (structure.command === 'referendum') {
+        state.referendums.push(structure);
+    } else if (structure.command === 'itrust') {
+        state.trustList.push(structure);
+        state.trustBySrcDestPair[structure.src + '|' + structure.dest] = structure.trust;
+    } else {
+        throw new Error();
+    }
+};
+
 var logToDb = state.logToDb = function (structure, cb) {
     var run = function () {
         if (state.syncing) {
@@ -69,13 +82,7 @@ var logToDb = state.logToDb = function (structure, cb) {
             cb("TrustDB.validate() failed");
             return;
         }
-        if (structure.command === 'referendum') {
-            state.referendums.push(structure);
-        } else if (structure.command === 'itrust') {
-            state.trustList.push(structure);
-        } else {
-            throw new Error();
-        }
+        updateState(structure);
         state.logStream.write(JSON.stringify(structure)+"\n");
         state.synced = false;
         cb();
@@ -131,12 +138,7 @@ global.state = state;
 TrustDB.readFile(DB_FILE, function (err, trusts) {
     // unrecoverable
     if (err) { throw err; }
-    trusts.forEach(function (tr) {
-        switch (tr.command) {
-            case 'itrust': state.trustList.push(tr); break;
-            case 'referendum': state.referendums.push(tr); break;
-        }
-    });
+    trusts.forEach(updateState);
     checkSync();
 
     var bot = new irc.Client(network.domain, network.nick, config);

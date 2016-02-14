@@ -89,19 +89,28 @@ var validItrust = function (tokens, cb) {
         channel: to,
         time: new Date().getTime(),
     };
-    console.log("Got a message");
 
     switch (tokens[0]) {
         case 'itrust': (function () {
-            if (from === tokens[1]) {
-                bot.say(to, "yeah yeah everybody trusts themselves, old news");
+            if (tokens.length < 2 || tokens.length > 3) {
+                bot.say(to, from + ": try `.itrust nick <int 0-100>` or `.itrust nick` to check");
                 return;
             }
-            validItrust(tokens, function (e, out) {
+            if (from === tokens[1]) {
+                bot.say(to, from + ": yeah yeah everybody trusts themselves, old news");
+                return;
+            }
+            nick2Host(tokens[1], function (e, out) {
                 if (e) {
-                    // there was an error. complain and return
-                    bot.say(to, e);
-                } else {
+                    bot.say(to, from + ": " + e);
+                    return;
+                }
+                if (tokens.length === 3) {
+                    if (!validPercent(tokens[2])) {
+                        bot.say(to, from + ": your value should be an integer between 0 " +
+                            "(no trust) and 100 (complete trust)");
+                        return;
+                    }
                     // no errors, write to log
                     state.logToDb({
                         command: 'itrust',
@@ -113,25 +122,31 @@ var validItrust = function (tokens, cb) {
                         time: new Date().getTime()
                     }, function (err) {
                         if (err) {
-                            bot.say(to, err);
+                            bot.say(to, from + ': ' + err);
                         } else {
                             bot.say(to, (from + " trusts " + out + " " + tokens[2] + "%"));
                         }
                     });
+                } else {
+                    var fTrust = state.trustBySrcDestPair[line.from + '|' + out] || 0;
+                    var rTrust = state.trustBySrcDestPair[out + '|' + line.from] || 0;
+                    bot.say(to, (from + " trusts " + out + " " + fTrust + "% and is trusted " +
+                        rTrust + "%"));
                 }
             });
+
         }());break;
 
         case 'karma': (function () {
             if (tokens.length !== 2) {
-                bot.say(to, 'try .karma <nick>');
+                bot.say(to, from + ': try .karma <nick>');
                 return;
             }
             nick2Host(tokens[1], function (err, addr) {
-                if (err) { bot.say(to, err); return; }
+                if (err) { bot.say(to, from + ': ' + err); return; }
                 state.whenSynced(function () {
                     var karma = Math.floor((state.karmaByAddr[addr] || 0) * 1000) / 1000;
-                    bot.say(to, addr + ' has ' + karma + ' karma');
+                    bot.say(to, from + ': ' + addr + ' has ' + karma + ' karma');
                 });
             });
         }());break;
@@ -139,12 +154,12 @@ var validItrust = function (tokens, cb) {
         case 'error': (function () {
             var error = state.error || "none";
             state.error = undefined;
-            bot.say(to, error);
+            bot.say(to, from + ': ' + error);
         }());break;
 
         case 'referendum': (function () {
             if (tokens.length < 4) {
-                bot.say(to, 'try .referendum <url of description> <opt1> <opt2> [<optX>]');
+                bot.say(to, from + ': try .referendum <url of description> <opt1> <opt2> [<optX>]');
                 return;
             }
             var num = state.referendums.length;
@@ -160,7 +175,7 @@ var validItrust = function (tokens, cb) {
                 time: new Date().getTime()
             }, function (err) {
                 if (err) {
-                    bot.say(to, err);
+                    bot.say(to, from + ': ' + err);
                 } else {
                     bot.say(to, (from + " created referendum r" + num + " (" + tokens[1] + ")"));
                 }
@@ -169,16 +184,16 @@ var validItrust = function (tokens, cb) {
 
         case 'vote': (function () {
             if (tokens.length < 3 || !/^[rR][0-9]+$/.test(tokens[1])) {
-                bot.say(to, 'try .vote r<number> <choice1> [<choice2> [<choiceX>]]');
+                bot.say(to, from + ': try .vote r<number> <choice1> [<choice2> [<choiceX>]]');
                 return;
             }
             var ref = state.referendums[Number(tokens[1].substring(1))];
             if (!ref) {
-                bot.say(to, 'referendum ' + tokens[1] + ' not found');
+                bot.say(to, from + ': referendum ' + tokens[1] + ' not found');
                 return;
             }
             if (ref.time < (now() - ONE_WEEK_MS)) {
-                bot.say(to, 'voting on referendum ' + tokens[1] + ' has closed');
+                bot.say(to, from + ': voting on referendum ' + tokens[1] + ' has closed');
                 return;
             }
             tokens.pop();
@@ -192,9 +207,9 @@ var validItrust = function (tokens, cb) {
                 time: now()
             }, function (err) {
                 if (err) {
-                    bot.say(to, err);
+                    bot.say(to, from + ': ' + err);
                 } else {
-                    bot.say(to, "Vote registered");
+                    bot.say(to, from + ': Vote registered');
                 }
             });
         }());break;
