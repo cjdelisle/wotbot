@@ -105,15 +105,17 @@ var runRootless = function (state0, trusts) {
         var addr;
         for (addr in state0) { karmaByAddr[addr] = state0[addr].karma; }
         var totalTrustByAddr = {};
+        var highestTotal = 0;
         trusts.forEach(function (t) {
-            totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]|0) + t.trust;
+            var total = totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]|0) + t.trust;
+            if (total > highestTotal) { highestTotal = total; }
             karmaByAddr[t.dst] = karmaByAddr[t.dst]|0;
         });
         var nextKarmaByAddr = {};
         trusts.forEach(function (t) {
             var ks = karmaByAddr[t.src]|0;
             var kd = karmaByAddr[t.dest]|0;
-            var tfrac = t.trust / totalTrustByAddr[t.src];
+            var tfrac = t.trust / highestTotal;
             if (tfrac > 1) { throw new Error(); }
             nextKarmaByAddr[t.dest] = (nextKarmaByAddr[t.dest] || kd) +
                 ((ks - (ks * RESERVE_K)) * tfrac);
@@ -137,6 +139,7 @@ var runRootless = function (state0, trusts) {
 var compute = module.exports.compute = function (parsed, cb) {
     parsed = parsed.filter(function (x) { return x.command === 'itrust'; });
     var out = run(parsed);
+    for (var x in out) { out[x].karma = 1; }
     cb(undefined, karmasToList(runRootless(out, parsed)));
 };
 
