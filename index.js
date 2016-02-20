@@ -73,7 +73,7 @@ var updateState = function (structure) {
         var refNum = Number(structure.num.substring(1));
         var ref = state.referendums[refNum];
         if (!ref) { return; }
-        var votes = referendumVotes[refNum] = referendumVotes[refNum] || [];
+        var votes = state.referendumVotes[refNum] = state.referendumVotes[refNum] || [];
         votes.push(structure);
     } else {
         throw new Error();
