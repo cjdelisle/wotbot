@@ -54,6 +54,7 @@ var state = {
     whenSynced: null,
     trustList: [],
     referendums: [],
+    referendumVotes: [],
     trustBySrcDestPair: {},
     karmas: null,
     karmaByAddr: null,
@@ -67,6 +68,13 @@ var updateState = function (structure) {
     } else if (structure.command === 'itrust') {
         state.trustList.push(structure);
         state.trustBySrcDestPair[structure.src + '|' + structure.dest] = structure.trust;
+    } else if (structure.command === 'vote') {
+        if (!/r[0-9]+/.test(structure)) { return; }
+        var refNum = Number(structure.num.substring(1));
+        var ref = state.referendums[refNum];
+        if (!ref) { return; }
+        var votes = referendumVotes[refNum] = referendumVotes[refNum] || [];
+        votes.push(structure);
     } else {
         throw new Error();
     }
@@ -176,6 +184,7 @@ TrustDB.readFile(DB_FILE, function (err, trusts) {
                             /* jshint -W061 */ // Suppress jshint warning
                             eval(out);
                         } catch (err) {
+                            console.error(err.stack);
                             console.error(err);
                         }
                     }

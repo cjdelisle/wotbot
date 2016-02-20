@@ -144,53 +144,61 @@ var nick2Host = function (nick, cb) {
                 return;
             }
             var num = state.referendums.length;
-            tokens.pop();
-            var url = tokens.pop();
+            var tkns = [];
+            tkns.push.apply(tkns, tokens);
+            tkns.shift();
+            var url = tkns.shift();
             state.logToDb({
                 command: 'referendum',
                 src: line.from,
                 srcNick: from,
                 url: url,
-                options: tokens,
+                options: tkns,
                 num: num,
-                time: new Date().getTime()
-            }, function (err) {
-                if (err) {
-                    bot.say(to, from + ': ' + err);
-                } else {
-                    bot.say(to, (from + " created referendum r" + num + " (" + tokens[1] + ")"));
-                }
-            });
-        }());break;
-
-        case 'vote': (function () {
-            if (tokens.length < 3 || !/^[rR][0-9]+$/.test(tokens[1])) {
-                bot.say(to, from + ': try .vote r<number> <choice1> [<choice2> [<choiceX>]]');
-                return;
-            }
-            var ref = state.referendums[Number(tokens[1].substring(1))];
-            if (!ref) {
-                bot.say(to, from + ': referendum ' + tokens[1] + ' not found');
-                return;
-            }
-            if (ref.time < (now() - ONE_WEEK_MS)) {
-                bot.say(to, from + ': voting on referendum ' + tokens[1] + ' has closed');
-                return;
-            }
-            tokens.pop();
-            var url = tokens.pop();
-            state.logToDb({
-                command: 'referendum',
-                src: line.from,
-                srcNick: from,
-                url: url,
-                options: tokens,
                 time: now()
             }, function (err) {
                 if (err) {
                     bot.say(to, from + ': ' + err);
                 } else {
-                    bot.say(to, from + ': Vote registered');
+                    bot.say(to, (from + " created referendum r" + num + " (" + url + ") options " + JSON.stringify(tkns)));
+                }
+            });
+        }());break;
+
+        case 'vote': (function () {
+            if (tokens.length < 3 || !/^r[0-9]+$/.test(tokens[1])) {
+                bot.say(to, from + ': try .vote r<number> <choice1> [<choice2> [<choiceX>]]');
+                return;
+            }
+            tokens.shift();
+            var refNum = tokens.shift();
+            var ref = state.referendums[Number(refNum.substring(1))];
+            if (!ref) {
+                bot.say(to, from + ': referendum ' + refNum + ' not found');
+                return;
+            }
+            if (ref.time < (now() - ONE_WEEK_MS)) {
+                bot.say(to, from + ': voting on referendum ' + refNum + ' has closed');
+                return;
+            }
+            for (var i = 0; i < tokens.length; i++) {
+                if (ref.options.indexOf(tokens[i]) === -1) {
+                    bot.say(to, from + ': ' + tokens[i] + ' is not a valid option');
+                    return;
+                }
+            }
+            state.logToDb({
+                command: 'vote',
+                src: line.from,
+                srcNick: from,
+                choices: tokens,
+                num: refNum,
+                time: now()
+            }, function (err) {
+                if (err) {
+                    bot.say(to, from + ': ' + err);
+                } else {
+                    bot.say(to, from + ': vote registered');
                 }
             });
         }());break;
