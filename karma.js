@@ -208,24 +208,20 @@ var runRootless1 = function (state0, trusts) {
 var runRootless = function (state0, trusts) {
     state0 = JSON.parse(JSON.stringify(state0));
     trusts = dedupe(trusts);
-    var cycles = 0;
     var cycle = function () {
-        cycles++;
         var karmaByAddr = {};
         var addr;
         for (addr in state0) { karmaByAddr[addr] = state0[addr].karma; }
         var totalTrustByAddr = {};
-        var highestTotal = 0;
         trusts.forEach(function (t) {
-            var total = totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]||0) + t.trust;
-            if (total > highestTotal) { highestTotal = total; }
-            karmaByAddr[t.dst] = karmaByAddr[t.dst]||0;
+            totalTrustByAddr[t.src] = (totalTrustByAddr[t.src]|0) + t.trust;
+            karmaByAddr[t.dst] = karmaByAddr[t.dst]|0;
         });
         var nextKarmaByAddr = {};
         trusts.forEach(function (t) {
-            var ks = karmaByAddr[t.src]||0;
-            var kd = karmaByAddr[t.dest]||0;
-            var tfrac = t.trust / highestTotal;
+            var ks = karmaByAddr[t.src]|0;
+            var kd = karmaByAddr[t.dest]|0;
+            var tfrac = t.trust / totalTrustByAddr[t.src];
             if (tfrac > 1) { throw new Error(); }
             nextKarmaByAddr[t.dest] = (nextKarmaByAddr[t.dest] || kd) +
                 ((ks - (ks * RESERVE_K)) * tfrac);
@@ -234,16 +230,15 @@ var runRootless = function (state0, trusts) {
         var totalDiff = 0;
         for (addr in nextKarmaByAddr) { totalKarma += nextKarmaByAddr[addr]; }
         var multiplier = 1000/totalKarma;
+        totalKarma = 0;
         for (addr in nextKarmaByAddr) {
             var nk = nextKarmaByAddr[addr] * multiplier;
             totalDiff += Math.abs(state0[addr].karma - nk);
             state0[addr].karma = nk;
         }
-        console.log(totalKarma + '  ' + totalDiff + '  ' + cycles);
         return totalDiff;
     };
     while (cycle() > 1) {}
-    console.log(cycles + ' cycles');
     return state0;
 };
 
