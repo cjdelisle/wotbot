@@ -220,9 +220,8 @@ var nick2Host = function (nick, cb) {
                     ('voting closed');
                 var winner = JSON.stringify(ret.tally.ranking[0]);
                 var rank = ret.tally.ranking.map(JSON.stringify).join(', ');
-                var expl = ret.tally.explanation.filter((x) => (x.indexOf('winner') === -1));
                 bot.say(to, from + ': ' + ref.url + ' ' + winner + ' winning, rank: ' + rank +
-                    ', ' + closeTime + ' (' + expl.join(', ') + ')');
+                    ', ' + closeTime + ' (' + ret.tally.explanation.join(', ') + ')');
             });
         }());break;
 

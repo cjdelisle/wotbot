@@ -50,7 +50,6 @@ let explainResults = function (options, p) {
             }
         }
         if (narrowestLossMargin === Infinity) {
-            out.push(JSON.stringify(options[i]) + ' is the winner');
         } else if (narrowestLossMargin === 0) {
             out.push(JSON.stringify(options[i]) + ' is tied with ' +
                 JSON.stringify(options[narrowestLossAgainst]));
