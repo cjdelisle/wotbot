@@ -9,8 +9,8 @@ var DEFAULT_DB_FILE = './test/trust.db';
 
 var requests = { };
 
-requests.karma = function (request, response, trusts) {
-    Karma.compute(trusts, function (err, out) {
+requests.trust_karma = function (request, response, state) {
+    Karma.compute(state.trustList, function (err, out) {
         if (err) {
             response.end(JSON.stringify(err, null, '  '));
             return;
@@ -19,12 +19,12 @@ requests.karma = function (request, response, trusts) {
     });
 };
 
-requests.trustHistory = function (request, response, trusts) {
+requests.trust_trustHistory = function (request, response, state) {
     var since = 0;
     var raw = false;
     request.url.replace(/[\?\&]since=([0-9]+)/, function (all, s) { since = Number(s); });
     if (/[\?\&]raw=true/.test(request.url)) { raw = true; }
-    var filteredTrusts = trusts.filter(function (jl) {
+    var filteredTrusts = state.trustList.filter(function (jl) {
         return (('time' in jl) && jl.time >= since);
     });
     var out;
@@ -52,14 +52,14 @@ var dedupe = function (trusts) {
     return outTrusts;
 };
 
-requests.trust = function (request, response, trusts) {
+requests.trust_trust = function (request, response, state) {
     response.end(JSON.stringify({
         error: 'none',
-        trusts: dedupe(trusts)
+        trusts: dedupe(state.trustList)
     }, null, '  '));
 };
 
-requests.network = function (request, response, trusts) {
+requests.trust_network = function (request, response, state) {
     var sort = 'from';
     var of;
     request.url.replace(/.*\?.*of=([^&]+)/, function (all, o) { of = o; });
@@ -73,7 +73,7 @@ requests.network = function (request, response, trusts) {
         return;
     }
     var addr = of;
-    trusts = dedupe(trusts);
+    var trusts = dedupe(state.trustList);
     trusts.some(function (tr) {
         if (tr.destNick === of || tr.dest === of) {
             addr = tr.dest;
@@ -82,7 +82,7 @@ requests.network = function (request, response, trusts) {
         }
     });
     var trustByAddr = {};
-    dedupe(trusts).forEach(function (tr) {
+    trusts.forEach(function (tr) {
         if (tr.dest === addr) {
             trustByAddr[tr.src] = trustByAddr[tr.src] ||
                 { nick: tr.srcNick, addr: tr.srcAddr, trustTo: 0 };
@@ -105,7 +105,29 @@ requests.network = function (request, response, trusts) {
     }, null, '  '));
 };
 
-requests.help = function (request, response, trusts) {
+requests.referendum_list = function (request, response, state) {
+    response.end(JSON.stringify({
+        error: 'none',
+        referendums: state.referendums
+    }, null, '  '));
+};
+
+requests.referendum_tally = function (request, response, state) {
+    var refNum;
+    request.url.replace(/.*\?.*ref=r([0-9]+)/, function (all, o) { refNum = o; });
+    if (!refNum) {
+        response.end(JSON.stringify({ error: "invalid request, expect ?ref=<refnum>" }));
+        return;
+    }
+    state.tallyReferendum(refNum, function (err, result) {
+        response.end(JSON.stringify({
+            error: (err || 'none'),
+            result: result
+        }, null, '  '));
+    });
+};
+
+requests.help = function (request, response, state) {
     response.end(JSON.stringify({
         available_commands: {
             '/trust/trustHistory?since=<millisecondsSinceEpoch>':
@@ -114,7 +136,9 @@ requests.help = function (request, response, trusts) {
             '/trust/karma': 'mappings of value (according to computation) for each person',
             '/trust/network?of=<name|ip>[&sortBy=<from|to>]':
                 'get ips/names who trust in and are trusted by ip/name, optionally sorted by ' +
-                    'most trust given to or received from.'
+                    'most trust given to or received from.',
+            '/referendum/tally?ref=<refnum>': 'get the full tally of a given referendum for voting',
+            '/referendum/list': 'get a list of all referendums'
         }
     }, null, '  '));
 };
@@ -133,14 +157,15 @@ var main = function () {
     });
 
     Http.createServer(function (request, response) {
-        TrustDB.readFile(dbfile, function (err, trusts) {
+        TrustDB.open(dbfile, function (err, state) {
             if (err) {
                 response.end(JSON.stringify({error: err}, null, '  '));
                 return;
             }
-            var fun = requests[request.url.replace(/^.*\/|\?.*$/g, '')] || requests.help;
-            fun(request, response, trusts);
-        });
+            var cleanURL = request.url.replace(/^\//, '').replace(/\//g, '_').replace(/\?.*$/, '');
+            var fun = requests[cleanURL] || requests.help;
+            fun(request, response, state);
+        }, true);
     }).listen(port, '::', function () {
         console.log("listening on port " + port);
     });

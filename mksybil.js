@@ -2,7 +2,7 @@ var Crypto = require('crypto');
 
 var mkIp = function () {
     var buff = Crypto.randomBytes(16).toString('hex');
-    buff = buff.replace(/([0-9a-f]{4})/g, function (all, block) { return block + ':' });
+    buff = buff.replace(/([0-9a-f]{4})/g, function (all, block) { return block + ':'; });
     buff = buff.replace(/^[0-9a-f]{2}/, 'fc').slice(0, -1);
     return buff;
 };

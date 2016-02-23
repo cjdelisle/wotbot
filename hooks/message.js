@@ -1,4 +1,4 @@
-/* globals args, bot, state */
+/* globals args, bot, state, network */
 
 /*
 >message
@@ -16,8 +16,7 @@ Got a message!
      args: [ '#bots', 'hi NSA' ] } }
 */
 
-var ONE_WEEK_MS = 1000 * 60 * 60 * 24 * 7;
-var now = function () { return new Date().getTime(); };
+var Time = require('./Time');
 
 var from = args.from,
     to = args.to,
@@ -60,7 +59,7 @@ var nick2Host = function (nick, cb) {
 };
 
 (function () {
-    if (content.indexOf(state.trigger) !== 0) { return; }
+    if (content.indexOf(network.trigger) !== 0) { return; }
 
     var tokens = content.trim().slice(1).split(/\s+/);
     if (to === bot.nick) { to = from; }
@@ -155,7 +154,7 @@ var nick2Host = function (nick, cb) {
                 url: url,
                 options: tkns,
                 num: num,
-                time: now()
+                time: Time.now()
             }, function (err) {
                 if (err) {
                     bot.say(to, from + ': ' + err);
@@ -177,7 +176,7 @@ var nick2Host = function (nick, cb) {
                 bot.say(to, from + ': referendum ' + refNum + ' not found');
                 return;
             }
-            if (ref.time < (now() - ONE_WEEK_MS)) {
+            if (ref.time < (Time.now() - Time.WEEK_MS)) {
                 bot.say(to, from + ': voting on referendum ' + refNum + ' has closed');
                 return;
             }
@@ -193,13 +192,37 @@ var nick2Host = function (nick, cb) {
                 srcNick: from,
                 choices: tokens,
                 num: refNum,
-                time: now()
+                time: Time.now()
             }, function (err) {
                 if (err) {
                     bot.say(to, from + ': ' + err);
                 } else {
                     bot.say(to, from + ': vote registered');
                 }
+            });
+        }());break;
+
+        case 'tally': (function () {
+            if (tokens.length !== 2 || !/^r[0-9]+$/.test(tokens[1])) {
+                bot.say(to, from + ': try .tally r<number>');
+                return;
+            }
+            tokens.shift();
+            var refNum = Number((''+tokens.shift()).substring(1));
+            var ref = state.referendums[refNum];
+            if (!ref) {
+                bot.say(to, from + ': referendum ' + refNum + ' not found');
+                return;
+            }
+            state.tallyReferendum(refNum, function (ret) {
+                var closeTime = ret.timeRemaining > 0 ?
+                    ('closing in: ' + Time.formatTimespan(ret.timeRemaining)) :
+                    ('voting closed');
+                var winner = JSON.stringify(ret.tally.ranking[0]);
+                var rank = ret.tally.ranking.map(JSON.stringify).join(', ');
+                var expl = ret.tally.explanation.filter((x) => (x.indexOf('winner') === -1));
+                bot.say(to, from + ': ' + ref.url + ' ' + winner + ' winning, rank: ' + rank +
+                    ', ' + closeTime + ' (' + expl.join(', ') + ')');
             });
         }());break;
 

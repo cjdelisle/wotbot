@@ -12,7 +12,8 @@
     "irc": "^0.4.0",
     "mis": "git+https://github.com/ansuz/mis.git",
     "agml": "^2.0.0",
-    "nthen": "~0.1.1"
+    "nthen": "~0.1.1",
+    "fair-vote-profile": "~0.0.7"
   },
   "devDependencies": {
     "jshint": "~2.9.1"
