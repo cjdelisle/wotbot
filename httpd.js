@@ -119,6 +119,15 @@ requests.help = function (request, response, trusts) {
     }, null, '  '));
 };
 
+var setCORS = function (response) {
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader("Access-Control-Allow-Methods", 'GET');
+};
+
+var setContentType = function (response, datatype) {
+    response.setHeader('Content-Type', datatype || 'application/json');
+};
+
 var main = function () {
     var config = [];
     agml.parse(Fs.readFileSync('./config.agml', 'utf-8'), config);
@@ -139,6 +148,8 @@ var main = function () {
                 return;
             }
             var fun = requests[request.url.replace(/^.*\/|\?.*$/g, '')] || requests.help;
+            setCORS(response);
+            setContentType(response);
             fun(request, response, trusts);
         });
     }).listen(port, '::', function () {
