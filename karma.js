@@ -213,7 +213,7 @@ var computeRootless = (function () {
     return computeRootless;
 }());
 
-var compute = module.exports.compute = computeRooted;
+var compute = module.exports.compute = computeRootless;
 
 if (module.parent === null) {
     var input = '';

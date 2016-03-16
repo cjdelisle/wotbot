@@ -246,3 +246,12 @@
 {"command":"itrust","src":"fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa","srcNick":"ansuz","dest":"fc99:de0e:7caa:28e3:25f3:7ade:5076:53ea","destNick":"tarlouzio","trust":50,"time":1455213498689}
 {"command":"itrust","src":"fca8:2dd7:4987:a9be:c8fc:34d7:5a1:4606","srcNick":"jercos","dest":"fc7c:6025:dce5:af5b:7a3f:8343:b581:c851","destNick":"finn","trust":75,"time":1455225532306}
 {"command":"itrust","src":"fca8:2dd7:4987:a9be:c8fc:34d7:5a1:4606","srcNick":"jercos","dest":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","destNick":"cjd","trust":49,"time":1455225538309}
+{"command":"referendum","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","url":"who_likes_icecream","options":["yes","no","maybe"],"num":0,"time":1455412593065}
+{"command":"referendum","src":"fc17:cc7e:57ea:1d2e:da91:6a65:b11e:a6d0","srcNick":"sol56","url":"is_cjd_good_at_what_he_does","options":["yes","no","maybe"],"num":1,"time":1455415598761}
+{"command":"referendum","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","url":"is_icecream_good","options":["yes","no"],"num":2,"time":1456088134176}
+{"command":"vote","src":"fc92:8136:dc1f:e6e0:4ef6:a6dd:7187:b85f","srcNick":"cjd","choices":["yes"],"num":"r2","time":1456088152075}
+{"command":"vote","src":"fcfe:f4ce:609f:434b:aa44:6ea0:ebc2:2d89","srcNick":"igel","choices":["yes"],"num":"r2","time":1456088156704}
+{"command":"vote","src":"fcfe:f4ce:609f:434b:aa44:6ea0:ebc2:2d89","srcNick":"igel","choices":["no"],"num":"r2","time":1456088166018}
+{"command":"vote","src":"fcfe:f4ce:609f:434b:aa44:6ea0:ebc2:2d89","srcNick":"igel","choices":["yes"],"num":"r2","time":1456088175089}
+{"command":"vote","src":"fcd0:dc87:86a:4612:11be:8486:4595:b65","srcNick":"Aranje","choices":["yes"],"num":"r2","time":1456088207981}
+{"command":"vote","src":"fc34:8675:ed95:600c:38d7:6eb8:f5b9:5bfa","srcNick":"ansuz","choices":["yes"],"num":"r2","time":1456088328316}
