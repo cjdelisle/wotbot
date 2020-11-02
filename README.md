@@ -1,5 +1,7 @@
 # wotbot
 
+Status: unmaintained
+
 Stuff you can do:
 
     node ./index.js   ## Start up the irc bot, might work
